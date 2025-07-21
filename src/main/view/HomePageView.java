@@ -2,7 +2,11 @@ package main.view;
 import javax.swing.*;
 
 public class HomePageView {
-    public static void main(String[] args) {
+    public HomePageView() {
+        createView();
+    }
+
+    private void createView() {
         JFrame frame = new JFrame("Recipe Manager");
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
