@@ -1,10 +1,24 @@
 package main.view;
-import javax.swing.*;
+import entity.Recipe;
 
-// should probably be an interface
+import javax.swing.*;
+import java.awt.*;
 
 public class RecipeView {
     String title;
+
+    // Created instance variables for the filters
+    protected JTextField name;
+    protected JTextField primaryIngredient;
+    protected JTextField dietType;
+    protected JTextField minCalories;
+    protected JTextField maxCalories;
+    protected JTextField protein;
+    protected JTextField maxFat;
+    protected JTextField maxSugar;
+    protected JTextField maxCarbs;
+    protected JButton searchButton;
+    protected JPanel resultsContainer;
 
     public RecipeView(String title) {
         this.title = title;
@@ -31,76 +45,56 @@ public class RecipeView {
 
     private JPanel createFiltersPanel(){
         JPanel panel = new JPanel();
-        JTextField name = new JTextField();
+        // Removed JTextField declarations (now using instance variables)
+        name = new JTextField();
         JPanel nameContainer = createInputBox("Name", name);
         panel.add(nameContainer);
 
-        JTextField primaryIngredient = new JTextField();
+        primaryIngredient = new JTextField();
         JPanel primaryIngredientContainer = createInputBox("Primary Ingredient", primaryIngredient);
         panel.add(primaryIngredientContainer);
 
-        JTextField dietType = new JTextField();
+        dietType = new JTextField();
         JPanel dietTypeContainer = createInputBox("Diet Type", dietType);
         panel.add(dietTypeContainer);
 
-        JTextField minCalories = new JTextField();
+        minCalories = new JTextField();
         JPanel minCaloriesContainer = createInputBox("Min Calories", minCalories);
         panel.add(minCaloriesContainer);
 
-        JTextField maxCalories = new JTextField();
+        maxCalories = new JTextField();
         JPanel maxCaloriesContainer = createInputBox("Max Calories", maxCalories);
         panel.add(maxCaloriesContainer);
 
-        JTextField protein = new JTextField();
+        protein = new JTextField();
         JPanel proteinContainer = createInputBox("Protein", protein);
         panel.add(proteinContainer);
 
-        JTextField maxFat = new JTextField();
+        maxFat = new JTextField();
         JPanel maxFatContainer = createInputBox("Max Fats", maxFat);
         panel.add(maxFatContainer);
 
-        JTextField maxSugar = new JTextField();
+        maxSugar = new JTextField();
         JPanel maxSugarContainer = createInputBox("Max Sugar", maxSugar);
         panel.add(maxSugarContainer);
 
-        JTextField maxCarbs = new JTextField();
+        maxCarbs = new JTextField();
         JPanel maxCarbsContainer = createInputBox("Max Carbs", maxCarbs);
         panel.add(maxCarbsContainer);
 
-        JButton searchButton = new JButton("Search");
+        searchButton = new JButton("Search");  // Store reference
         panel.add(searchButton);
         return panel;
     }
 
-    private JPanel createResultsPanel(){
-        JPanel results = new JPanel();
-        results.setLayout(new BoxLayout(results, BoxLayout.Y_AXIS));
-        JPanel resultsRow1 = new JPanel();
-        JPanel resultsRow2 = new JPanel();
+    private JScrollPane createResultsPanel() {
+        resultsContainer = new JPanel();
+        resultsContainer.setLayout(new GridLayout(0, 4, 10, 10)); // 4 columns with spacing
 
-        JButton result1 = new JButton("result1");
-        JButton result2 = new JButton("result2");
-        JButton result3 = new JButton("result3");
-        JButton result4 = new JButton("result4");
-        JButton[] resultList1 = {result1, result2, result3, result4};
-
-        for(JButton button : resultList1){
-            resultsRow1.add(button);
-        }
-
-        JButton result5 = new JButton("result5");
-        JButton result6 = new JButton("result6");
-        JButton result7 = new JButton("result7");
-        JButton result8 = new JButton("result8");
-        JButton[] resultList2 = {result5, result6, result7, result8};
-
-        for(JButton button : resultList2){
-            resultsRow2.add(button);
-        }
-
-        results.add(resultsRow1);
-        results.add(resultsRow2);
-        return results;
+        JScrollPane scrollPane = new JScrollPane(resultsContainer);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        return scrollPane;
     }
 
     private JPanel createPageControlPanel(){
@@ -130,7 +124,7 @@ public class RecipeView {
         panel.add(filtersPanel);
 
         // results
-        JPanel resultsPanel = createResultsPanel();
+        JScrollPane resultsPanel = createResultsPanel();
         panel.add(resultsPanel);
 
         //next/prev page
