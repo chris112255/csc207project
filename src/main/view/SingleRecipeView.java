@@ -1,5 +1,7 @@
 package main.view;
 
+import entity.Recipe;
+
 import javax.swing.*;
 import java.util.List;
 

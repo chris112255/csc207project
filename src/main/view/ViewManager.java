@@ -14,8 +14,8 @@ public class ViewManager {
     }
 
     public static void main(String[] args) {
-        ExplorePageView explorePageView = new ExplorePageView();
+        //ExplorePageView explorePageView = new ExplorePageView();
         //SavedRecipesView savedRecipesView = new SavedRecipesView();
-        //HomePageView homePageView = new HomePageView();
+        HomePageView homePageView = new HomePageView();
     }
 }

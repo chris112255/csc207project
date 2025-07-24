@@ -34,15 +34,6 @@ public class RecipeView {
         return panel;
     }
 
-    private JPanel createTitleBar(){
-        JPanel panel = new JPanel();
-        JButton homeButton = new JButton("Home");
-        JLabel label = new JLabel(this.title);
-        panel.add(homeButton);
-        panel.add(label);
-        return panel;
-    }
-
     private JPanel createFiltersPanel(){
         JPanel panel = new JPanel();
         // Removed JTextField declarations (now using instance variables)
@@ -116,8 +107,17 @@ public class RecipeView {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         //title bar
-        JPanel titleBar = createTitleBar();
+        JPanel titleBar = new JPanel();
+        JButton homeButton = new JButton("Home");
+        homeButton.addActionListener(e -> {
+            new HomePageView();
+            frame.dispose();
+        });
+        JLabel label = new JLabel(this.title);
+        titleBar.add(homeButton);
+        titleBar.add(label);
         panel.add(titleBar);
+
 
         //filters
         JPanel filtersPanel = createFiltersPanel();

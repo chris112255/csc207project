@@ -20,8 +20,16 @@ public class HomePageView {
 
         JPanel buttons = new JPanel();
         JButton search = new JButton("Search Recipes");
+        search.addActionListener(e -> {
+            new ExplorePageView();
+            frame.dispose();
+        });
         buttons.add(search);
         JButton favourites = new JButton("Favourites");
+        favourites.addActionListener(e -> {
+            new SavedRecipesView();
+            frame.dispose();
+        });
         buttons.add(favourites);
         panel.add(buttons);
         frame.add(panel);
