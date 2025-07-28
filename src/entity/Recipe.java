@@ -1,5 +1,6 @@
 package entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Recipe {
@@ -15,11 +16,13 @@ public class Recipe {
     private final String cuisineType;
     private final String mealType;
     private final String dishType;
+    private final String sourceUrl;
 
+    // Full constructor
     public Recipe(String name, String mainIngredient, List<String> ingredients,
                   String instructions, int ingredientCount, List<String> dietType,
                   Nutrients nutrients, double prepTime, String cuisineType,
-                  String mealType, String dishType) {
+                  String mealType, String dishType, String sourceUrl) {
         this.name = name;
         this.mainIngredient = mainIngredient;
         this.ingredients = ingredients;
@@ -31,6 +34,23 @@ public class Recipe {
         this.cuisineType = cuisineType;
         this.mealType = mealType;
         this.dishType = dishType;
+        this.sourceUrl = sourceUrl;
+    }
+
+    // Minimal constructor used by the SearchRecipesUseCase
+    public Recipe(String name, String imageUrl, String sourceUrl) {
+        this.name = name;
+        this.mainIngredient = "";
+        this.ingredients = new ArrayList<>();
+        this.instructions = "";
+        this.ingredientCount = 0;
+        this.dietType = new ArrayList<>();
+        this.nutrients = null;
+        this.prepTime = 0.0;
+        this.cuisineType = "";
+        this.mealType = "";
+        this.dishType = "";
+        this.sourceUrl = sourceUrl;
     }
 
     public String getName() {
@@ -75,5 +95,9 @@ public class Recipe {
 
     public String getDishType() {
         return dishType;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
     }
 }
