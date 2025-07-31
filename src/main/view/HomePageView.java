@@ -19,20 +19,20 @@ public class HomePageView {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        JLabel label = new JLabel("Receipe Manager");
+        JLabel label = new JLabel("Recipe Manager");
         panel.add(label);
 
         JButton search = new JButton("Search Recipes");
         search.addActionListener(e -> {
-            SearchRecipesUseCase useCase = new SearchRecipesUseCase(new EdamamRecipeSearchGateway());
-            new ExplorePageView(useCase);
-            frame.dispose();
+            frame.dispose(); // Close current window
+            new ExplorePageView(); // Open explore page
         });
         buttons.add(search);
+
         JButton favourites = new JButton("Favourites");
         favourites.addActionListener(e -> {
-            new SavedRecipesView();
-            frame.dispose();
+            frame.dispose(); // Close current window
+            new SavedRecipesView(); // Open saved recipes page
         });
         buttons.add(favourites);
         panel.add(buttons);

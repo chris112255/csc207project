@@ -6,9 +6,8 @@ import java.awt.*;
 
 public class RecipeView {
     String title;
-
+    protected JFrame frame;
     // Created instance variables for the filters
-    protected JTextField name;
     protected JTextField primaryIngredient;
     protected JTextField dietType;
     protected JTextField minCalories;
@@ -34,12 +33,21 @@ public class RecipeView {
         return panel;
     }
 
+    private JPanel createTitleBar() {
+        JPanel panel = new JPanel();
+        JButton homeButton = new JButton("Home");
+        homeButton.addActionListener(e -> {
+            frame.dispose(); // Close current window
+            new HomePageView(); // Open home page
+        });
+        JLabel label = new JLabel(this.title);
+        panel.add(homeButton);
+        panel.add(label);
+        return panel;
+    }
+
     private JPanel createFiltersPanel(){
         JPanel panel = new JPanel();
-        // Removed JTextField declarations (now using instance variables)
-        name = new JTextField();
-        JPanel nameContainer = createInputBox("Name", name);
-        panel.add(nameContainer);
 
         primaryIngredient = new JTextField();
         JPanel primaryIngredientContainer = createInputBox("Primary Ingredient", primaryIngredient);
@@ -98,7 +106,7 @@ public class RecipeView {
     }
 
     private void createView(){
-        JFrame frame = new JFrame("Recipe Manager");
+        frame = new JFrame("Recipe Manager");
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
