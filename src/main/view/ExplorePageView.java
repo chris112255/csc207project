@@ -19,7 +19,6 @@ public class ExplorePageView extends RecipeView {
     public ExplorePageView() {
 
         super("Explore Page");
-        this.searchRecipesUseCase = searchRecipesUseCase;
 
         searchButton.addActionListener(e -> {
             Map<String, String> filters = getSearchFilters();
@@ -81,7 +80,7 @@ public class ExplorePageView extends RecipeView {
                 recipePanel.setBorder(BorderFactory.createEtchedBorder());
 
                 // Recipe title button
-                JButton recipeButton = new JButton("<html><center>" + recipe.getTitle() + "</center></html>");
+                JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
                 recipeButton.setPreferredSize(new java.awt.Dimension(180, 60));
 
 
@@ -98,13 +97,13 @@ public class ExplorePageView extends RecipeView {
                         favouritesUsecase.removeFromFavourites(recipe);
                         favoriteButton.setText("Add to Favorites");
                         JOptionPane.showMessageDialog(this.resultsContainer,
-                                "Removed from favorites: " + recipe.getTitle(),
+                                "Removed from favorites: " + recipe.getName(),
                                 "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     } else {
                         favouritesUsecase.addToFavourites(recipe);
                         favoriteButton.setText("Remove from Favorites");
                         JOptionPane.showMessageDialog(this.resultsContainer,
-                                "Added to favorites: " + recipe.getTitle(),
+                                "Added to favorites: " + recipe.getName(),
                                 "Favorites", JOptionPane.INFORMATION_MESSAGE);
 
                     }

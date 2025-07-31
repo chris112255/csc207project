@@ -17,8 +17,29 @@ public class Recipe {
     private final String mealType;
     private final String dishType;
     private final String sourceUrl;
+    private final String imageUrl;
 
     // Full constructor
+    public Recipe(String name, String mainIngredient, List<String> ingredients,
+                  String instructions, int ingredientCount, List<String> dietType,
+                  Nutrients nutrients, double prepTime, String cuisineType,
+                  String mealType, String dishType, String sourceUrl, String imageUrl) {
+        this.name = name;
+        this.mainIngredient = mainIngredient;
+        this.ingredients = ingredients;
+        this.instructions = instructions;
+        this.ingredientCount = ingredientCount;
+        this.dietType = dietType;
+        this.nutrients = nutrients;
+        this.prepTime = prepTime;
+        this.cuisineType = cuisineType;
+        this.mealType = mealType;
+        this.dishType = dishType;
+        this.sourceUrl = sourceUrl;
+        this.imageUrl = imageUrl;
+    }
+
+    //Constructor used by EdamamRecipeSearchGateway
     public Recipe(String name, String mainIngredient, List<String> ingredients,
                   String instructions, int ingredientCount, List<String> dietType,
                   Nutrients nutrients, double prepTime, String cuisineType,
@@ -35,6 +56,7 @@ public class Recipe {
         this.mealType = mealType;
         this.dishType = dishType;
         this.sourceUrl = sourceUrl;
+        this.imageUrl = null;
     }
 
     // Minimal constructor used by the SearchRecipesUseCase
@@ -51,6 +73,7 @@ public class Recipe {
         this.mealType = "";
         this.dishType = "";
         this.sourceUrl = sourceUrl;
+        this.imageUrl = imageUrl;
     }
 
     public String getName() {
@@ -100,4 +123,47 @@ public class Recipe {
     public String getSourceUrl() {
         return sourceUrl;
     }
+
+    public int getNutriCalories() {
+        if (this.nutrients != null) {
+            return nutrients.getCalories();
+        }
+        return 0;
+    }
+
+    public double getNutriProtein() {
+        if (this.nutrients != null) {
+            return nutrients.getProtein();
+        }
+        return 0;
+    }
+
+    public double getNutriSugar() {
+        if (this.nutrients != null) {
+            return nutrients.getSugar();
+        }
+        return 0;
+    }
+
+    public double getNutriFat() {
+        if (this.nutrients != null) {
+            return nutrients.getFat();
+        }
+        return 0;
+    }
+
+    public double getNutriSodium() {
+        if (this.nutrients != null) {
+            return nutrients.getSodium();
+        }
+        return 0;
+    }
+
+    public String getImageUrl() {
+        if (imageUrl != null) {
+            return imageUrl;
+        }
+        return "";
+    }
+
 }

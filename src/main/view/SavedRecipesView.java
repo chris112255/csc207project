@@ -38,7 +38,7 @@ public class SavedRecipesView extends RecipeView {
                 recipePanel.setBorder(BorderFactory.createEtchedBorder());
 
                 // Recipe title button
-                JButton recipeButton = new JButton("<html><center>" + recipe.getTitle() + "</center></html>");
+                JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
                 recipeButton.setPreferredSize(new java.awt.Dimension(180, 60));
 
                 JButton removeButton = new JButton("Remove from Favorites");
@@ -46,7 +46,7 @@ public class SavedRecipesView extends RecipeView {
                 removeButton.addActionListener(e -> {
                     favoritesUsecase.removeFromFavourites(recipe);
                     JOptionPane.showMessageDialog(this.resultsContainer,
-                            "Removed from favorites: " + recipe.getTitle(),
+                            "Removed from favorites: " + recipe.getName(),
                             "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     // Refresh the display
                     loadFavorites();

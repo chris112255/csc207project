@@ -23,16 +23,16 @@ public class FavouritesUsecase {
     public void addToFavourites(Recipe recipe) {
         // Check if recipe is already in favourites
         for (Recipe favourite : favourites) {
-            if (favourite.getTitle().equals(recipe.getTitle()) &&
+            if (favourite.getName().equals(recipe.getName()) &&
                     favourite.getSourceUrl().equals(recipe.getSourceUrl())) {
-                System.out.println("Recipe already in favourites: " + recipe.getTitle());
+                System.out.println("Recipe already in favourites: " + recipe.getName());
                 return;
             }
         }
 
         favourites.add(recipe);
         savefavourites();
-        System.out.println("Added to favourites: " + recipe.getTitle());
+        System.out.println("Added to favourites: " + recipe.getName());
     }
 
     /**
@@ -40,11 +40,11 @@ public class FavouritesUsecase {
      */
     public void removeFromFavourites(Recipe recipe) {
         favourites.removeIf(favourite ->
-                favourite.getTitle().equals(recipe.getTitle()) &&
+                favourite.getName().equals(recipe.getName()) &&
                         favourite.getSourceUrl().equals(recipe.getSourceUrl())
         );
         savefavourites();
-        System.out.println("Removed from favourites: " + recipe.getTitle());
+        System.out.println("Removed from favourites: " + recipe.getName());
     }
 
     /**
@@ -59,7 +59,7 @@ public class FavouritesUsecase {
      */
     public boolean isFavourite(Recipe recipe) {
         return favourites.stream().anyMatch(favourite ->
-                favourite.getTitle().equals(recipe.getTitle()) &&
+                favourite.getName().equals(recipe.getName()) &&
                         favourite.getSourceUrl().equals(recipe.getSourceUrl())
         );
     }
@@ -70,7 +70,7 @@ public class FavouritesUsecase {
     private void savefavourites() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(favouritesFile))) {
             for (Recipe recipe : favourites) {
-                writer.println(recipe.getTitle() + "|" + recipe.getImageUrl() + "|" + recipe.getSourceUrl());
+                writer.println(recipe.getName() + "|" + recipe.getImageUrl() + "|" + recipe.getSourceUrl());
             }
         } catch (IOException e) {
             System.err.println("Error saving favourites: " + e.getMessage());
