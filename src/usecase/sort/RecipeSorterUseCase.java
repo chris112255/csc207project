@@ -1,4 +1,4 @@
 package usecase.sort;
 
-public class SortRecipesUseCase {
+public class RecipeSorterUseCase {
 }
