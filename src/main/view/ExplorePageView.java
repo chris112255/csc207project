@@ -74,7 +74,7 @@ public class ExplorePageView extends RecipeView {
             resultsContainer.add(new JLabel("No recipes found. Try adjusting your search criteria."));
         } else {
             for (Recipe recipe : recipes) {
-                JButton recipeButton = new JButton(recipe.getName());
+                JButton recipeButton = new JButton(recipe.getDish());
                 recipeButton.addActionListener(e -> {
                     try {
                         Desktop.getDesktop().browse(URI.create(recipe.getSourceUrl()));

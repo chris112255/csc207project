@@ -1,8 +1,7 @@
-// api/EdamamRecipeSearchGateway.java
 package api;
 
-import entity.Recipe;
 import entity.Nutrients;
+import entity.Recipe;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import usecase.search.RecipeSearchGateway;
@@ -18,23 +17,22 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
 
     private static final String APP_ID = "30597585";
     private static final String APP_KEY = "51e24339cd8c63f545b3c9dce37082b8";
-    private String sourceUrl;
 
     @Override
     public List<Recipe> searchRecipes(Map<String, String> filters) throws Exception {
-        String apiUrl = buildApiUrl(filters);
-        try {
-            String jsonResponse = sendApiRequest(apiUrl);
-            return parseRecipes(jsonResponse);
-        } catch (Exception e) {
-            System.err.println("Gateway Error: " + e.getMessage());
-            return new ArrayList<>();
-        }
+        String jsonResponse = fetchRecipes(filters);
+        return parseRecipes(jsonResponse);
     }
 
     @Override
     public String fetchRecipes(Map<String, String> filters) {
-        return "";
+        try {
+            String apiUrl = buildApiUrl(filters);
+            return sendApiRequest(apiUrl);
+        } catch (Exception e) {
+            System.err.println("Error fetching recipes: " + e.getMessage());
+            return "{}";  // empty JSON object fallback
+        }
     }
 
     private String buildApiUrl(Map<String, String> params) throws Exception {
@@ -47,12 +45,9 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
             String value = entry.getValue();
 
             if (value != null && !value.isEmpty()) {
-                if (key.equals("q")) {
-                    urlBuilder.append("&q=").append(URLEncoder.encode(value, "UTF-8"));
-                } else if (key.equals("diet")) {
-                    urlBuilder.append("&diet=").append(URLEncoder.encode(value, "UTF-8"));
-                } else if (key.equals("calories")) {
-                    urlBuilder.append("&calories=").append(URLEncoder.encode(value, "UTF-8"));
+                if (key.equals("q") || key.equals("diet") || key.equals("calories")) {
+                    urlBuilder.append("&").append(key).append("=")
+                            .append(URLEncoder.encode(value, "UTF-8"));
                 } else {
                     String nutrientCode = getNutrientCode(key);
                     if (nutrientCode != null) {
@@ -83,7 +78,6 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
     private List<Recipe> parseRecipes(String jsonResponse) {
         List<Recipe> recipes = new ArrayList<>();
         JSONObject json = new JSONObject(jsonResponse);
-
         JSONArray hits = json.optJSONArray("hits");
         if (hits == null) return recipes;
 
@@ -103,9 +97,14 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
 
             String instructions = "See full recipe online.";
             int ingredientCount = ingredients.size();
+
             List<String> dietLabels = new ArrayList<>();
             JSONArray diets = recipeJson.optJSONArray("dietLabels");
-            if (diets != null) for (int j = 0; j < diets.length(); j++) dietLabels.add(diets.getString(j));
+            if (diets != null) {
+                for (int j = 0; j < diets.length(); j++) {
+                    dietLabels.add(diets.getString(j));
+                }
+            }
 
             JSONObject totalNutrients = recipeJson.optJSONObject("totalNutrients");
             Nutrients nutrients = new Nutrients(
@@ -123,10 +122,13 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
                     recipeJson.getJSONArray("mealType").optString(0) : "N/A";
             String dishType = recipeJson.optJSONArray("dishType") != null ?
                     recipeJson.getJSONArray("dishType").optString(0) : "N/A";
+            String sourceUrl = recipeJson.optString("url", "");
 
             recipes.add(new Recipe(name, mainIngredient, ingredients, instructions,
-                    ingredientCount, dietLabels, nutrients, prepTime, cuisineType, mealType, dishType, this.sourceUrl));
+                    ingredientCount, dietLabels, nutrients, prepTime, cuisineType,
+                    mealType, dishType, sourceUrl));
         }
+
         return recipes;
     }
 
