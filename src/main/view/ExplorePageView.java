@@ -1,7 +1,8 @@
 // ExplorePageView.java
 package main.view;
 
-import usecase.SearchRecipesUseCase;
+import usecase.FavouritesUsecase;
+import usecase.SearchRecipesUsecase;
 import entity.Recipe;
 
 import javax.swing.*;
@@ -10,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ExplorePageView extends RecipeView {
-    private final SearchRecipesUseCase searchRecipesUseCase = new SearchRecipesUseCase();
-
+    private final SearchRecipesUsecase searchRecipesUseCase = new SearchRecipesUsecase();
+    private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
     public ExplorePageView() {
         super("Explore Page");
 
@@ -26,14 +27,8 @@ public class ExplorePageView extends RecipeView {
     private Map<String, String> getSearchFilters() {
         Map<String, String> filters = new HashMap<>();
 
-        // Combine name and primary ingredient into a single search query
         StringBuilder queryBuilder = new StringBuilder();
-        String recipeName = name.getText().trim();
         String ingredient = primaryIngredient.getText().trim();
-
-        if (!recipeName.isEmpty()) {
-            queryBuilder.append(recipeName);
-        }
 
         if (!ingredient.isEmpty()) {
             if (queryBuilder.length() > 0) {
@@ -52,7 +47,7 @@ public class ExplorePageView extends RecipeView {
             filters.put("diet", diet);
         }
 
-        // Handle calorie range
+        // Calorie range
         String minCal = minCalories.getText().trim();
         String maxCal = maxCalories.getText().trim();
         if (!minCal.isEmpty() || !maxCal.isEmpty()) {
@@ -94,17 +89,42 @@ public class ExplorePageView extends RecipeView {
             resultsContainer.add(noResultsLabel);
         } else {
             for (Recipe recipe : recipes) {
-                JButton recipeButton = new JButton(recipe.getTitle());
-                // Add action listener to show recipe details later
-                recipeButton.addActionListener(e -> {
-                    // This will open the recipe URL in browser
-                    try {
-                        java.awt.Desktop.getDesktop().browse(java.net.URI.create(recipe.getSourceUrl()));
-                    } catch (Exception ex) {
-                        System.err.println("Error opening recipe URL: " + ex.getMessage());
+                JPanel recipePanel = new JPanel();
+                recipePanel.setLayout(new BoxLayout(recipePanel, BoxLayout.Y_AXIS));
+                recipePanel.setBorder(BorderFactory.createEtchedBorder());
+
+                // Recipe title button
+                JButton recipeButton = new JButton("<html><center>" + recipe.getTitle() + "</center></html>");
+                recipeButton.setPreferredSize(new java.awt.Dimension(180, 60));
+
+
+                JButton favoriteButton = new JButton("Add to Favorites");
+                favoriteButton.setPreferredSize(new java.awt.Dimension(180, 30));
+
+                // Check if already in favorites and update button text
+                if (favouritesUsecase.isFavourite(recipe)) {
+                    favoriteButton.setText("Remove from Favorites");
+                }
+
+                favoriteButton.addActionListener(e -> {
+                    if (favouritesUsecase.isFavourite(recipe)) {
+                        favouritesUsecase.removeFromFavourites(recipe);
+                        favoriteButton.setText("Add to Favorites");
+                        JOptionPane.showMessageDialog(this.resultsContainer,
+                                "Removed from favorites: " + recipe.getTitle(),
+                                "Favorites", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        favouritesUsecase.addToFavourites(recipe);
+                        favoriteButton.setText("Remove from Favorites");
+                        JOptionPane.showMessageDialog(this.resultsContainer,
+                                "Added to favorites: " + recipe.getTitle(),
+                                "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     }
                 });
-                resultsContainer.add(recipeButton);
+
+                recipePanel.add(recipeButton);
+                recipePanel.add(favoriteButton);
+                resultsContainer.add(recipePanel);
             }
         }
 

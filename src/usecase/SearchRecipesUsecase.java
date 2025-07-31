@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SearchRecipesUseCase {
+public class SearchRecipesUsecase {
     private static final String APP_ID = "30597585";
     private static final String APP_KEY = "51e24339cd8c63f545b3c9dce37082b8";
 

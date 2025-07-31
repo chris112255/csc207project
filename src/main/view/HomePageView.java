@@ -15,13 +15,22 @@ public class HomePageView {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        JLabel label = new JLabel("Receipe Manager");
+        JLabel label = new JLabel("Recipe Manager");
         panel.add(label);
 
         JPanel buttons = new JPanel();
         JButton search = new JButton("Search Recipes");
+        search.addActionListener(e -> {
+            frame.dispose(); // Close current window
+            new ExplorePageView(); // Open explore page
+        });
         buttons.add(search);
+
         JButton favourites = new JButton("Favourites");
+        favourites.addActionListener(e -> {
+            frame.dispose(); // Close current window
+            new SavedRecipesView(); // Open saved recipes page
+        });
         buttons.add(favourites);
         panel.add(buttons);
         frame.add(panel);
