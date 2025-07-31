@@ -82,6 +82,9 @@ public class ExplorePageView extends RecipeView {
                 // Recipe title button
                 JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
                 recipeButton.setPreferredSize(new java.awt.Dimension(180, 60));
+                recipeButton.addActionListener(e -> {
+                    new SingleRecipeView(recipe);
+                });
 
 
                 JButton favoriteButton = new JButton("Add to Favorites");
