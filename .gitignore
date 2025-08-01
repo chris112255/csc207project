@@ -1,0 +1,23 @@
+# IntelliJ project files
+.idea/
+*.iml
+
+# Build artifacts
+/out/
+target/
+*.class
+
+# Logs
+*.log
+
+# OS-generated
+.DS_Store
+
+# Maven
+.settings/
+*.jar
+*.war
+*.ear
+
+# Others
+*.swp
