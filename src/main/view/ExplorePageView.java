@@ -1,13 +1,11 @@
 package main.view;
 
-
 import usecase.FavouritesUsecase;
 import usecase.SearchRecipesUsecase;
 import entity.Recipe;
 
 import javax.swing.*;
 import java.awt.*;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +14,8 @@ public class ExplorePageView extends RecipeView {
 
     private final SearchRecipesUsecase searchRecipesUseCase = new SearchRecipesUsecase();
     private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
-    public ExplorePageView() {
 
+    public ExplorePageView() {
         super("Explore Page");
 
         searchButton.addActionListener(e -> {
@@ -34,14 +32,16 @@ public class ExplorePageView extends RecipeView {
         String ingredient = primaryIngredient.getText().trim();
 
         if (!ingredient.isEmpty()) {
-            if (queryBuilder.length() > 0) queryBuilder.append(" ");
             queryBuilder.append(ingredient);
         }
 
         if (queryBuilder.length() > 0) filters.put("q", queryBuilder.toString());
 
-        String diet = dietType.getText().trim();
-        if (!diet.isEmpty()) filters.put("diet", diet);
+        // ✅ Updated: use dietTypeDropdown from RecipeView
+        String selectedDiet = (String) dietTypeDropdown.getSelectedItem();
+        if (selectedDiet != null && !selectedDiet.isEmpty()) {
+            filters.put("diet", selectedDiet);
+        }
 
         // Calorie range
         String minCal = minCalories.getText().trim();
@@ -79,18 +79,13 @@ public class ExplorePageView extends RecipeView {
                 recipePanel.setLayout(new BoxLayout(recipePanel, BoxLayout.Y_AXIS));
                 recipePanel.setBorder(BorderFactory.createEtchedBorder());
 
-                // Recipe title button
                 JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
-                recipeButton.setPreferredSize(new java.awt.Dimension(180, 60));
-                recipeButton.addActionListener(e -> {
-                    new SingleRecipeView(recipe);
-                });
-
+                recipeButton.setPreferredSize(new Dimension(180, 60));
+                recipeButton.addActionListener(e -> new SingleRecipeView(recipe));
 
                 JButton favoriteButton = new JButton("Add to Favorites");
-                favoriteButton.setPreferredSize(new java.awt.Dimension(180, 30));
+                favoriteButton.setPreferredSize(new Dimension(180, 30));
 
-                // Check if already in favorites and update button text
                 if (favouritesUsecase.isFavourite(recipe)) {
                     favoriteButton.setText("Remove from Favorites");
                 }
@@ -108,7 +103,6 @@ public class ExplorePageView extends RecipeView {
                         JOptionPane.showMessageDialog(this.resultsContainer,
                                 "Added to favorites: " + recipe.getName(),
                                 "Favorites", JOptionPane.INFORMATION_MESSAGE);
-
                     }
                 });
 

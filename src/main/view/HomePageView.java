@@ -16,6 +16,7 @@ public class HomePageView {
 
         // create panel
         JPanel buttons = new JPanel();
+
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
