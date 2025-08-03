@@ -19,7 +19,7 @@ public class Recipe {
     private final String sourceUrl;
     private final String imageUrl;
 
-    // Full constructor
+    // === Full Constructor ===
     public Recipe(String name, String mainIngredient, List<String> ingredients,
                   String instructions, int ingredientCount, List<String> dietType,
                   Nutrients nutrients, double prepTime, String cuisineType,
@@ -39,27 +39,16 @@ public class Recipe {
         this.imageUrl = imageUrl;
     }
 
-    //Constructor used by EdamamRecipeSearchGateway
+    // === Constructor used by EdamamRecipeSearchGateway (UPDATED to include imageUrl) ===
     public Recipe(String name, String mainIngredient, List<String> ingredients,
                   String instructions, int ingredientCount, List<String> dietType,
                   Nutrients nutrients, double prepTime, String cuisineType,
-                  String mealType, String dishType, String sourceUrl) {
-        this.name = name;
-        this.mainIngredient = mainIngredient;
-        this.ingredients = ingredients;
-        this.instructions = instructions;
-        this.ingredientCount = ingredientCount;
-        this.dietType = dietType;
-        this.nutrients = nutrients;
-        this.prepTime = prepTime;
-        this.cuisineType = cuisineType;
-        this.mealType = mealType;
-        this.dishType = dishType;
-        this.sourceUrl = sourceUrl;
-        this.imageUrl = null;
+                  String mealType, String dishType, String sourceUrl, String imageUrl, boolean fromEdamam) {
+        this(name, mainIngredient, ingredients, instructions, ingredientCount, dietType,
+                nutrients, prepTime, cuisineType, mealType, dishType, sourceUrl, imageUrl);
     }
 
-    // Minimal constructor used by the SearchRecipesUseCase
+    // === Minimal Constructor used by SearchRecipesUseCase ===
     public Recipe(String name, String imageUrl, String sourceUrl) {
         this.name = name;
         this.mainIngredient = "";
@@ -75,6 +64,8 @@ public class Recipe {
         this.sourceUrl = sourceUrl;
         this.imageUrl = imageUrl;
     }
+
+    // === Getters ===
 
     public String getName() {
         return name;
@@ -125,45 +116,26 @@ public class Recipe {
     }
 
     public int getNutriCalories() {
-        if (this.nutrients != null) {
-            return nutrients.getCalories();
-        }
-        return 0;
+        return (nutrients != null) ? nutrients.getCalories() : 0;
     }
 
     public double getNutriProtein() {
-        if (this.nutrients != null) {
-            return nutrients.getProtein();
-        }
-        return 0;
+        return (nutrients != null) ? nutrients.getProtein() : 0;
     }
 
     public double getNutriSugar() {
-        if (this.nutrients != null) {
-            return nutrients.getSugar();
-        }
-        return 0;
+        return (nutrients != null) ? nutrients.getSugar() : 0;
     }
 
     public double getNutriFat() {
-        if (this.nutrients != null) {
-            return nutrients.getFat();
-        }
-        return 0;
+        return (nutrients != null) ? nutrients.getFat() : 0;
     }
 
     public double getNutriSodium() {
-        if (this.nutrients != null) {
-            return nutrients.getSodium();
-        }
-        return 0;
+        return (nutrients != null) ? nutrients.getSodium() : 0;
     }
 
     public String getImageUrl() {
-        if (imageUrl != null) {
-            return imageUrl;
-        }
-        return "";
+        return (imageUrl != null) ? imageUrl : "";
     }
-
 }
