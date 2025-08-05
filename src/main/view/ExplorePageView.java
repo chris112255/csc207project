@@ -7,6 +7,7 @@ import usecase.sort.RecipeSorterUseCase;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +24,8 @@ public class ExplorePageView extends RecipeView {
             Map<String, String> filters = getSearchFilters();
             List<Recipe> recipes = searchRecipesUseCase.execute(filters);
             updateResults(recipes);
+            createResultSorter(recipes);
         });
-
-        createResultSorter();
     }
 
     private Map<String, String> getSearchFilters() {
@@ -119,15 +119,14 @@ public class ExplorePageView extends RecipeView {
         resultsContainer.repaint();
     }
 
-    private void createResultSorter() {
-        Map<String, String> filters = getSearchFilters();
-        List<Recipe> results = searchRecipesUseCase.execute(filters);
+    private void createResultSorter(List<Recipe> recipes) {
+        List<Recipe> results = new ArrayList<>(recipes);
+        List<Recipe> unsortedResults = new ArrayList<>(results);
         JPopupMenu sortMenu = new JPopupMenu();
         sortMenu.add(new JLabel("Sort By:"));
 
         JMenuItem defaultItem = new JMenuItem("Default");
         defaultItem.addActionListener(e -> {
-            List<Recipe> unsortedResults = searchRecipesUseCase.execute(filters);
             updateResults(unsortedResults);
         });
         sortMenu.add(defaultItem);
