@@ -20,6 +20,7 @@ public class RecipeView {
     protected JTextField maxCarbs;
 
     protected JButton searchButton;
+    protected JButton sortButton;
     protected JPanel resultsContainer;
 
     public RecipeView(String title) {
@@ -80,6 +81,9 @@ public class RecipeView {
 
         searchButton = new JButton("Search");
         panel.add(searchButton);
+
+        sortButton = new JButton("Sort By:");
+        panel.add(sortButton);
 
         return panel;
     }

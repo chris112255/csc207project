@@ -3,6 +3,7 @@ package main.view;
 import usecase.FavouritesUsecase;
 import usecase.SearchRecipesUsecase;
 import entity.Recipe;
+import usecase.sort.RecipeSorterUseCase;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +24,8 @@ public class ExplorePageView extends RecipeView {
             List<Recipe> recipes = searchRecipesUseCase.execute(filters);
             updateResults(recipes);
         });
+
+        createResultSorter();
     }
 
     private Map<String, String> getSearchFilters() {
@@ -114,5 +117,107 @@ public class ExplorePageView extends RecipeView {
 
         resultsContainer.revalidate();
         resultsContainer.repaint();
+    }
+
+    private void createResultSorter() {
+        Map<String, String> filters = getSearchFilters();
+        List<Recipe> results = searchRecipesUseCase.execute(filters);
+        JPopupMenu sortMenu = new JPopupMenu();
+        sortMenu.add(new JLabel("Sort By:"));
+
+        JMenuItem defaultItem = new JMenuItem("Default");
+        defaultItem.addActionListener(e -> {
+            List<Recipe> unsortedResults = searchRecipesUseCase.execute(filters);
+            updateResults(unsortedResults);
+        });
+        sortMenu.add(defaultItem);
+
+        JMenuItem favItem = new JMenuItem("Favourites");
+        favItem.addActionListener(e -> {
+            RecipeSorterUseCase favSort = new RecipeSorterUseCase("favs");
+            favSort.sortRecipes(results);
+            updateResults(results);
+        });
+        sortMenu.add(favItem);
+
+        JMenuItem ingredientItem = new JMenuItem("Least Ingredients");
+        ingredientItem.addActionListener(e -> {
+            RecipeSorterUseCase ingredientSort = new RecipeSorterUseCase("ingredients");
+            ingredientSort.sortRecipes(results);
+            updateResults(results);
+        });
+        sortMenu.add(ingredientItem);
+
+        JMenuItem timeItem = new JMenuItem("Least Prep Time");
+        timeItem.addActionListener(e -> {
+            RecipeSorterUseCase timeSort = new RecipeSorterUseCase("time");
+            timeSort.sortRecipes(results);
+            updateResults(results);
+        });
+        sortMenu.add(timeItem);
+
+        JMenuItem leastCalItem = new JMenuItem("Least Calories");
+        leastCalItem.addActionListener(e -> {
+            RecipeSorterUseCase leastCalSort = new RecipeSorterUseCase("caloriesAscending");
+            leastCalSort.sortRecipes(results);
+            updateResults(results);
+        });
+        sortMenu.add(leastCalItem);
+
+        JMenuItem mostCalItem = new JMenuItem("Most Calories");
+        mostCalItem.addActionListener(e -> {
+            RecipeSorterUseCase mostCalSort = new RecipeSorterUseCase("caloriesDescending");
+            mostCalSort.sortRecipes(results);
+            updateResults(results);
+        });
+        sortMenu.add(mostCalItem);
+
+        JMenuItem mostProtItem = new JMenuItem("Most Protein");
+        mostProtItem.addActionListener(e -> {
+            RecipeSorterUseCase mostProtSort = new RecipeSorterUseCase("proteinDescending");
+            mostProtSort.sortRecipes(results);
+            updateResults(results);
+        });
+        sortMenu.add(mostProtItem);
+
+        JMenuItem leastFatItem = new JMenuItem("Least Fat");
+        leastFatItem.addActionListener(e -> {
+            RecipeSorterUseCase leastFatSort = new RecipeSorterUseCase("fatAscending");
+            leastFatSort.sortRecipes(results);
+            updateResults(results);
+        });
+        sortMenu.add(leastFatItem);
+
+        JMenuItem leastSugarItem = new JMenuItem("Least Sugar");
+        leastSugarItem.addActionListener(e -> {
+            RecipeSorterUseCase leastSugarSort = new RecipeSorterUseCase("sugarAscending");
+            leastSugarSort.sortRecipes(results);
+            updateResults(results);
+        });
+        sortMenu.add(leastSugarItem);
+
+        String[] types = {
+                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks",
+                "Asian", "British", "Caribbean", "Central Europe", "Chinese", "Eastern Europe",
+                "French", "Greek", "Indian", "Italian", "Japanese", "Korean", "Kosher",
+                "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "South American", "South East Asian"
+        };
+
+        for (String type : types) {
+            String menuItemLabel = type + " First";
+            String sorterType = "type" + type;
+
+            JMenuItem menuItem = new JMenuItem(menuItemLabel);
+            menuItem.addActionListener(e -> {
+                RecipeSorterUseCase sorter = new RecipeSorterUseCase(sorterType);
+                sorter.sortRecipes(results);
+                updateResults(results);
+            });
+            sortMenu.add(menuItem);
+        }
+
+        sortButton.addActionListener(e -> {
+            sortMenu.show(sortButton, 0, sortButton.getHeight() + 200);
+        });
     }
 }
