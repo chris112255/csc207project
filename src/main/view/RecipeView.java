@@ -1,7 +1,5 @@
 package main.view;
 
-import entity.Recipe;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,7 +9,7 @@ public class RecipeView {
 
     // Filter fields
     protected JTextField primaryIngredient;
-    protected JComboBox<String> dietTypeDropdown; // ✅ Updated to dropdown
+    protected JComboBox<String> dietTypeDropdown;
     protected JTextField minCalories;
     protected JTextField maxCalories;
     protected JTextField protein;
@@ -21,6 +19,10 @@ public class RecipeView {
 
     protected JButton searchButton;
     protected JPanel resultsContainer;
+    protected JPanel resultsWrapper;
+    protected JPanel pageControlPanel;
+    protected JButton prevButton;
+    protected JButton nextButton;
 
     public RecipeView(String title) {
         this.title = title;
@@ -37,7 +39,7 @@ public class RecipeView {
     }
 
     private JPanel createTitleBar() {
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton homeButton = new JButton("Home");
         homeButton.addActionListener(e -> {
             frame.dispose();
@@ -52,7 +54,7 @@ public class RecipeView {
     private JPanel createFiltersPanel() {
         JPanel panel = new JPanel();
 
-        primaryIngredient = new JTextField();
+        primaryIngredient = new JTextField(8);
         panel.add(createInputBox("Primary Ingredient", primaryIngredient));
 
         dietTypeDropdown = new JComboBox<>(new String[] {
@@ -60,22 +62,22 @@ public class RecipeView {
         });
         panel.add(createInputBox("Diet Type", dietTypeDropdown));
 
-        minCalories = new JTextField();
+        minCalories = new JTextField(5);
         panel.add(createInputBox("Min Calories", minCalories));
 
-        maxCalories = new JTextField();
+        maxCalories = new JTextField(5);
         panel.add(createInputBox("Max Calories", maxCalories));
 
-        protein = new JTextField();
+        protein = new JTextField(5);
         panel.add(createInputBox("Protein", protein));
 
-        maxFat = new JTextField();
+        maxFat = new JTextField(5);
         panel.add(createInputBox("Max Fats", maxFat));
 
-        maxSugar = new JTextField();
+        maxSugar = new JTextField(5);
         panel.add(createInputBox("Max Sugar", maxSugar));
 
-        maxCarbs = new JTextField();
+        maxCarbs = new JTextField(5);
         panel.add(createInputBox("Max Carbs", maxCarbs));
 
         searchButton = new JButton("Search");
@@ -84,39 +86,41 @@ public class RecipeView {
         return panel;
     }
 
-    private JScrollPane createResultsPanel() {
+    private JPanel createResultsPanel() {
         resultsContainer = new JPanel();
-        resultsContainer.setLayout(new GridLayout(0, 4, 10, 10));
+        resultsContainer.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 20));
 
-        JScrollPane scrollPane = new JScrollPane(resultsContainer);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        return scrollPane;
+        resultsWrapper = new JPanel(new BorderLayout());
+        resultsWrapper.add(resultsContainer, BorderLayout.CENTER);
+        return resultsWrapper;
     }
 
-    private JPanel createPageControlPanel() {
-        JPanel pageControls = new JPanel();
-        JButton nextPage = new JButton("next");
-        JButton prevPage = new JButton("prev");
-        pageControls.add(prevPage);
-        pageControls.add(nextPage);
-        return pageControls;
+    protected JPanel createPageControlPanel() {
+        pageControlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        prevButton = new JButton("prev");
+        nextButton = new JButton("next");
+
+        pageControlPanel.add(prevButton);
+        pageControlPanel.add(nextButton);
+
+        return pageControlPanel;
     }
 
     private void createView() {
         frame = new JFrame("Recipe Manager");
-        frame.setSize(800, 600);
+        frame.setSize(1200, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(createTitleBar());
+        topPanel.add(createFiltersPanel());
 
-        panel.add(createTitleBar());
-        panel.add(createFiltersPanel());
-        panel.add(createResultsPanel());
-        panel.add(createPageControlPanel());
+        frame.add(topPanel, BorderLayout.NORTH);
+        frame.add(createResultsPanel(), BorderLayout.CENTER);
+        frame.add(createPageControlPanel(), BorderLayout.SOUTH);
 
-        frame.add(panel);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }

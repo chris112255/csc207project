@@ -123,10 +123,24 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
             String dishType = recipeJson.optJSONArray("dishType") != null ?
                     recipeJson.getJSONArray("dishType").optString(0) : "N/A";
             String sourceUrl = recipeJson.optString("url", "");
+            String imageUrl = recipeJson.optString("image", "");
 
-            recipes.add(new Recipe(name, mainIngredient, ingredients, instructions,
-                    ingredientCount, dietLabels, nutrients, prepTime, cuisineType,
-                    mealType, dishType, sourceUrl));
+            recipes.add(new Recipe(
+                    name,
+                    mainIngredient,
+                    ingredients,
+                    instructions,
+                    ingredientCount,
+                    dietLabels,
+                    nutrients,
+                    prepTime,
+                    cuisineType,
+                    mealType,
+                    dishType,
+                    sourceUrl,
+                    imageUrl,
+                    true
+            ));
         }
 
         return recipes;
