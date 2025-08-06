@@ -7,7 +7,10 @@ import usecase.sort.RecipeSorterUseCase;
 
 import javax.swing.*;
 import java.awt.*;
+
 import java.util.ArrayList;
+
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,14 +20,33 @@ public class ExplorePageView extends RecipeView {
     private final SearchRecipesUsecase searchRecipesUseCase = new SearchRecipesUsecase();
     private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
 
+    private List<Recipe> allRecipes;
+    private int currentPage = 0;
+    private final int RECIPES_PER_PAGE = 8;
+
     public ExplorePageView() {
         super("Explore Page");
 
         searchButton.addActionListener(e -> {
-            Map<String, String> filters = getSearchFilters();
-            List<Recipe> recipes = searchRecipesUseCase.execute(filters);
-            updateResults(recipes);
-            createResultSorter(recipes);
+            Map<String, String> filters = getSearchFilters();            
+            allRecipes = searchRecipesUseCase.execute(filters);
+            currentPage = 0;
+            showPage(currentPage);
+            createResultSorter(allRecipes)
+        });
+
+        prevButton.addActionListener(e -> {
+            if (currentPage > 0) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        nextButton.addActionListener(e -> {
+            if ((currentPage + 1) * RECIPES_PER_PAGE < allRecipes.size()) {
+                currentPage++;
+                showPage(currentPage);
+            }
         });
     }
 
@@ -40,13 +62,11 @@ public class ExplorePageView extends RecipeView {
 
         if (queryBuilder.length() > 0) filters.put("q", queryBuilder.toString());
 
-        // ✅ Updated: use dietTypeDropdown from RecipeView
         String selectedDiet = (String) dietTypeDropdown.getSelectedItem();
         if (selectedDiet != null && !selectedDiet.isEmpty()) {
             filters.put("diet", selectedDiet);
         }
 
-        // Calorie range
         String minCal = minCalories.getText().trim();
         String maxCal = maxCalories.getText().trim();
         if (!minCal.isEmpty() || !maxCal.isEmpty()) {
@@ -70,42 +90,46 @@ public class ExplorePageView extends RecipeView {
         }
     }
 
-    public void updateResults(List<Recipe> recipes) {
+    private void showPage(int pageIndex) {
         resultsContainer.removeAll();
 
-        if (recipes.isEmpty()) {
+        if (allRecipes == null || allRecipes.isEmpty()) {
             resultsContainer.add(new JLabel("No recipes found. Try adjusting your search criteria."));
         } else {
-            for (Recipe recipe : recipes) {
+            int start = pageIndex * RECIPES_PER_PAGE;
+            int end = Math.min(start + RECIPES_PER_PAGE, allRecipes.size());
+            List<Recipe> pageRecipes = allRecipes.subList(start, end);
 
+            for (Recipe recipe : pageRecipes) {
                 JPanel recipePanel = new JPanel();
                 recipePanel.setLayout(new BoxLayout(recipePanel, BoxLayout.Y_AXIS));
                 recipePanel.setBorder(BorderFactory.createEtchedBorder());
+                recipePanel.setPreferredSize(new Dimension(180, 220));
+
+                try {
+                    URL imageUrl = new URL(recipe.getImageUrl());
+                    ImageIcon icon = new ImageIcon(imageUrl);
+                    Image scaledImg = icon.getImage().getScaledInstance(160, 120, Image.SCALE_SMOOTH);
+                    JLabel imageLabel = new JLabel(new ImageIcon(scaledImg));
+                    recipePanel.add(imageLabel);
+                } catch (Exception e) {
+                    recipePanel.add(new JLabel("[Image not available]"));
+                }
 
                 JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
-                recipeButton.setPreferredSize(new Dimension(180, 60));
+                recipeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
                 recipeButton.addActionListener(e -> new SingleRecipeView(recipe));
 
-                JButton favoriteButton = new JButton("Add to Favorites");
-                favoriteButton.setPreferredSize(new Dimension(180, 30));
-
-                if (favouritesUsecase.isFavourite(recipe)) {
-                    favoriteButton.setText("Remove from Favorites");
-                }
+                JButton favoriteButton = new JButton(favouritesUsecase.isFavourite(recipe) ? "Remove from Favorites" : "Add to Favorites");
+                favoriteButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
                 favoriteButton.addActionListener(e -> {
                     if (favouritesUsecase.isFavourite(recipe)) {
                         favouritesUsecase.removeFromFavourites(recipe);
                         favoriteButton.setText("Add to Favorites");
-                        JOptionPane.showMessageDialog(this.resultsContainer,
-                                "Removed from favorites: " + recipe.getName(),
-                                "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     } else {
                         favouritesUsecase.addToFavourites(recipe);
                         favoriteButton.setText("Remove from Favorites");
-                        JOptionPane.showMessageDialog(this.resultsContainer,
-                                "Added to favorites: " + recipe.getName(),
-                                "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     }
                 });
 
