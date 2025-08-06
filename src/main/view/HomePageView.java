@@ -36,6 +36,14 @@ public class HomePageView {
             new SavedRecipesView(); // Open saved recipes page
         });
         buttons.add(favourites);
+
+        JButton planner = new JButton("Meal Planner");
+        planner.addActionListener(e -> {
+            frame.dispose(); // Close current window
+            new MealPlannerView(); // Open explore page
+        });
+        buttons.add(planner);
+
         panel.add(buttons);
         frame.add(panel);
 
