@@ -94,29 +94,19 @@ public class RecipeView {
         return panel;
     }
 
-    private JPanel createResultsPanel() {
+    private JScrollPane createResultsPanel() {
         resultsContainer = new JPanel();
-        resultsContainer.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 20));
+        resultsContainer.setLayout(new GridLayout(0, 4, 10, 10));
 
-        resultsWrapper = new JPanel(new BorderLayout());
-        resultsWrapper.add(resultsContainer, BorderLayout.CENTER);
-        return resultsWrapper;
-    }
-
-    protected JPanel createPageControlPanel() {
-        pageControlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        prevButton = new JButton("prev");
-        nextButton = new JButton("next");
-
-        pageControlPanel.add(prevButton);
-        pageControlPanel.add(nextButton);
-
-        return pageControlPanel;
+        JScrollPane scrollPane = new JScrollPane(resultsContainer);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        return scrollPane;
     }
 
     private void createView() {
         frame = new JFrame("Recipe Manager");
-        frame.setSize(1200, 800);
+        frame.setSize(1000, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
@@ -127,7 +117,6 @@ public class RecipeView {
 
         frame.add(topPanel, BorderLayout.NORTH);
         frame.add(createResultsPanel(), BorderLayout.CENTER);
-        frame.add(createPageControlPanel(), BorderLayout.SOUTH);
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

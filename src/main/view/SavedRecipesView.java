@@ -90,7 +90,7 @@ public class SavedRecipesView extends RecipeView {
         });
         sortMenu.add(defaultItem);
 
-        JMenuItem favItem = new JMenuItem("Favourites");
+        JMenuItem favItem = new JMenuItem("Similar to Favourites");
         favItem.addActionListener(e -> {
             RecipeSorterUseCase favSort = new RecipeSorterUseCase("favs");
             favSort.sortRecipes(favourites);
