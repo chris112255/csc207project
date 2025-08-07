@@ -2,6 +2,7 @@ package main.view;
 
 import usecase.FavouritesUsecase;
 import usecase.SearchRecipesUsecase;
+import usecase.MealPlannerUsecase;
 import entity.Recipe;
 import usecase.sort.RecipeSorterUseCase;
 
@@ -19,13 +20,15 @@ public class ExplorePageView extends RecipeView {
 
     private final SearchRecipesUsecase searchRecipesUseCase = new SearchRecipesUsecase();
     private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
+    //private final MealPlannerUsecase mealPlannerUsecase = new MealPlannerUsecase();
 
     private List<Recipe> allRecipes;
     private int currentPage = 0;
     private final int RECIPES_PER_PAGE = 8;
+    //private MealPlannerUsecase mealPlannerUseCase;
 
-    public ExplorePageView() {
-        super("Explore Page");
+    public ExplorePageView(MealPlannerUsecase mpUseCase) {
+        super("Explore Page", mpUseCase);
 
         searchButton.addActionListener(e -> {
             Map<String, String> filters = getSearchFilters();            
@@ -133,8 +136,24 @@ public class ExplorePageView extends RecipeView {
                     }
                 });
 
+                JButton addToMealPlanButton = new JButton("Add to Meal Plan");
+                addToMealPlanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+                addToMealPlanButton.addActionListener(e -> {
+                    if(mealPlannerUseCase.isSelected(recipe)) {
+                        System.out.println("already asdded");
+                        mealPlannerUseCase.removeFromPlanner(recipe);
+                        addToMealPlanButton.setText("Add to Meal Plan");
+                    }
+                    else {
+                        mealPlannerUseCase.addToPlanner(recipe);
+                        addToMealPlanButton.setText("Remove from Meal Plan");
+                    }
+                });
+
                 recipePanel.add(recipeButton);
                 recipePanel.add(favoriteButton);
+                recipePanel.add(addToMealPlanButton);
                 resultsContainer.add(recipePanel);
             }
         }

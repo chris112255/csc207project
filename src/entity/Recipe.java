@@ -138,4 +138,6 @@ public class Recipe {
     public String getImageUrl() {
         return (imageUrl != null) ? imageUrl : "";
     }
+
+    public double getNutriCarbs() {return (nutrients != null) ? nutrients.getCarbs() : 0; }
 }

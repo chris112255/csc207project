@@ -2,7 +2,9 @@ package main.view;
 
 import usecase.FavouritesUsecase;
 import entity.Recipe;
+import usecase.MealPlannerUsecase;
 import usecase.sort.RecipeSorterUseCase;
+
 
 import javax.swing.*;
 import java.util.List;
@@ -11,8 +13,8 @@ import java.util.Map;
 public class SavedRecipesView extends RecipeView {
     private final FavouritesUsecase favoritesUsecase = new FavouritesUsecase();
 
-    public SavedRecipesView() {
-        super("Saved Recipes");
+    public SavedRecipesView(MealPlannerUsecase mpUseCase) {
+        super("Saved Recipes", mpUseCase);
         loadFavorites();
 
         createFavSorter();
@@ -61,6 +63,13 @@ public class SavedRecipesView extends RecipeView {
 
                 recipePanel.add(recipeButton);
                 recipePanel.add(removeButton);
+
+                JButton addToPlanner = new JButton("Add to Planner");
+                recipePanel.add(addToPlanner);
+                addToPlanner.addActionListener(e -> {
+                    mealPlannerUseCase.addToPlanner(recipe);
+                });
+
                 resultsContainer.add(recipePanel);
             }
         }

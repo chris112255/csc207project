@@ -7,6 +7,7 @@ public class Nutrients {
     private final double fat;
     private final double sugar;
     private final double sodium;
+    private final double carbs;
 
     public Nutrients(int calories, double protein, double fat, double sugar, double sodium) {
         this.calories = calories;
@@ -14,6 +15,7 @@ public class Nutrients {
         this.fat = fat;
         this.sugar = sugar;
         this.sodium = sodium;
+        this.carbs = 0;
     }
 
     public int getCalories() {
@@ -34,5 +36,9 @@ public class Nutrients {
 
     public double getSodium() {
         return sodium;
+    }
+
+    public double getCarbs() {
+        return carbs;
     }
 }

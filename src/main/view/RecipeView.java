@@ -1,5 +1,7 @@
 package main.view;
 
+import usecase.MealPlannerUsecase;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -24,9 +26,11 @@ public class RecipeView {
     protected JPanel pageControlPanel;
     protected JButton prevButton;
     protected JButton nextButton;
+    protected MealPlannerUsecase mealPlannerUseCase;
 
-    public RecipeView(String title) {
+    public RecipeView(String title, MealPlannerUsecase mpUseCase) {
         this.title = title;
+        mealPlannerUseCase = mpUseCase;
         this.createView();
     }
 
@@ -44,7 +48,7 @@ public class RecipeView {
         JButton homeButton = new JButton("Home");
         homeButton.addActionListener(e -> {
             frame.dispose();
-            new HomePageView();
+            new HomePageView(mealPlannerUseCase);
         });
         JLabel label = new JLabel(this.title);
         panel.add(homeButton);
