@@ -121,7 +121,6 @@ public class ExplorePageView extends RecipeView {
 
                 addToMealPlanButton.addActionListener(e -> {
                     if(mealPlannerUseCase.isSelected(recipe)) {
-                        System.out.println("already asdded");
                         mealPlannerUseCase.removeFromPlanner(recipe);
                         addToMealPlanButton.setText("Add to Meal Plan");
                     }
