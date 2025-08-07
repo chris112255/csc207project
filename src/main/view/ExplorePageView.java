@@ -22,8 +22,6 @@ public class ExplorePageView extends RecipeView {
     private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
     //private final MealPlannerUsecase mealPlannerUsecase = new MealPlannerUsecase();
 
-    private List<Recipe> allRecipes;
-    private int currentPage = 0;
     private final int RECIPES_PER_PAGE = 8;
     //private MealPlannerUsecase mealPlannerUseCase;
 
@@ -31,25 +29,10 @@ public class ExplorePageView extends RecipeView {
         super("Explore Page", mpUseCase);
 
         searchButton.addActionListener(e -> {
-            Map<String, String> filters = getSearchFilters();            
-            allRecipes = searchRecipesUseCase.execute(filters);
-            currentPage = 0;
-            showPage(currentPage);
-            createResultSorter(allRecipes)
-        });
-
-        prevButton.addActionListener(e -> {
-            if (currentPage > 0) {
-                currentPage--;
-                showPage(currentPage);
-            }
-        });
-
-        nextButton.addActionListener(e -> {
-            if ((currentPage + 1) * RECIPES_PER_PAGE < allRecipes.size()) {
-                currentPage++;
-                showPage(currentPage);
-            }
+            Map<String, String> filters = getSearchFilters();
+            List<Recipe> recipes = searchRecipesUseCase.execute(filters);
+            updateResults(recipes);
+            createResultSorter(recipes);
         });
     }
 
@@ -93,67 +76,47 @@ public class ExplorePageView extends RecipeView {
         }
     }
 
-    private void showPage(int pageIndex) {
+    public void updateResults(List<Recipe> recipes) {
         resultsContainer.removeAll();
 
-        if (allRecipes == null || allRecipes.isEmpty()) {
+        if (recipes.isEmpty()) {
             resultsContainer.add(new JLabel("No recipes found. Try adjusting your search criteria."));
         } else {
-            int start = pageIndex * RECIPES_PER_PAGE;
-            int end = Math.min(start + RECIPES_PER_PAGE, allRecipes.size());
-            List<Recipe> pageRecipes = allRecipes.subList(start, end);
+            for (Recipe recipe : recipes) {
 
-            for (Recipe recipe : pageRecipes) {
                 JPanel recipePanel = new JPanel();
                 recipePanel.setLayout(new BoxLayout(recipePanel, BoxLayout.Y_AXIS));
                 recipePanel.setBorder(BorderFactory.createEtchedBorder());
-                recipePanel.setPreferredSize(new Dimension(180, 220));
-
-                try {
-                    URL imageUrl = new URL(recipe.getImageUrl());
-                    ImageIcon icon = new ImageIcon(imageUrl);
-                    Image scaledImg = icon.getImage().getScaledInstance(160, 120, Image.SCALE_SMOOTH);
-                    JLabel imageLabel = new JLabel(new ImageIcon(scaledImg));
-                    recipePanel.add(imageLabel);
-                } catch (Exception e) {
-                    recipePanel.add(new JLabel("[Image not available]"));
-                }
 
                 JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
-                recipeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+                recipeButton.setPreferredSize(new Dimension(180, 60));
                 recipeButton.addActionListener(e -> new SingleRecipeView(recipe));
 
-                JButton favoriteButton = new JButton(favouritesUsecase.isFavourite(recipe) ? "Remove from Favorites" : "Add to Favorites");
-                favoriteButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+                JButton favoriteButton = new JButton("Add to Favorites");
+                favoriteButton.setPreferredSize(new Dimension(180, 30));
+
+                if (favouritesUsecase.isFavourite(recipe)) {
+                    favoriteButton.setText("Remove from Favorites");
+                }
 
                 favoriteButton.addActionListener(e -> {
                     if (favouritesUsecase.isFavourite(recipe)) {
                         favouritesUsecase.removeFromFavourites(recipe);
                         favoriteButton.setText("Add to Favorites");
+                        JOptionPane.showMessageDialog(this.resultsContainer,
+                                "Removed from favorites: " + recipe.getName(),
+                                "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     } else {
                         favouritesUsecase.addToFavourites(recipe);
                         favoriteButton.setText("Remove from Favorites");
-                    }
-                });
-
-                JButton addToMealPlanButton = new JButton("Add to Meal Plan");
-                addToMealPlanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-                addToMealPlanButton.addActionListener(e -> {
-                    if(mealPlannerUseCase.isSelected(recipe)) {
-                        System.out.println("already asdded");
-                        mealPlannerUseCase.removeFromPlanner(recipe);
-                        addToMealPlanButton.setText("Add to Meal Plan");
-                    }
-                    else {
-                        mealPlannerUseCase.addToPlanner(recipe);
-                        addToMealPlanButton.setText("Remove from Meal Plan");
+                        JOptionPane.showMessageDialog(this.resultsContainer,
+                                "Added to favorites: " + recipe.getName(),
+                                "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     }
                 });
 
                 recipePanel.add(recipeButton);
                 recipePanel.add(favoriteButton);
-                recipePanel.add(addToMealPlanButton);
                 resultsContainer.add(recipePanel);
             }
         }
@@ -164,7 +127,8 @@ public class ExplorePageView extends RecipeView {
 
     private void createResultSorter(List<Recipe> recipes) {
         List<Recipe> results = new ArrayList<>(recipes);
-        List<Recipe> unsortedResults = new ArrayList<>(results);
+        List<Recipe> unsortedResults = new ArrayList<>();
+        unsortedResults.addAll(results);
         JPopupMenu sortMenu = new JPopupMenu();
         sortMenu.add(new JLabel("Sort By:"));
 
@@ -174,7 +138,7 @@ public class ExplorePageView extends RecipeView {
         });
         sortMenu.add(defaultItem);
 
-        JMenuItem favItem = new JMenuItem("Favourites");
+        JMenuItem favItem = new JMenuItem("Similar to Favourites");
         favItem.addActionListener(e -> {
             RecipeSorterUseCase favSort = new RecipeSorterUseCase("favs");
             favSort.sortRecipes(results);

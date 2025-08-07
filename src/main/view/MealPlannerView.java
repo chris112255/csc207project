@@ -31,7 +31,7 @@ public class MealPlannerView {
 
     private void createView() {
         frame = new JFrame("Meal Planenr");
-        frame.setSize(1200, 800);
+        frame.setSize(1000, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
