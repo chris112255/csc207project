@@ -3,9 +3,12 @@ package main.view;
 import usecase.FavouritesUsecase;
 import entity.Recipe;
 import usecase.MealPlannerUsecase;
+import usecase.sort.RecipeSorterUseCase;
+
 
 import javax.swing.*;
 import java.util.List;
+import java.util.Map;
 
 public class SavedRecipesView extends RecipeView {
     private final FavouritesUsecase favoritesUsecase = new FavouritesUsecase();
@@ -13,6 +16,8 @@ public class SavedRecipesView extends RecipeView {
     public SavedRecipesView(MealPlannerUsecase mpUseCase) {
         super("Saved Recipes", mpUseCase);
         loadFavorites();
+
+        createFavSorter();
     }
 
     /**
@@ -41,6 +46,9 @@ public class SavedRecipesView extends RecipeView {
                 // Recipe title button
                 JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
                 recipeButton.setPreferredSize(new java.awt.Dimension(180, 60));
+                recipeButton.addActionListener(e -> {
+                    new SingleRecipeView(recipe);
+                });
 
                 JButton removeButton = new JButton("Remove from Favorites");
                 removeButton.setPreferredSize(new java.awt.Dimension(180, 30));
@@ -70,4 +78,104 @@ public class SavedRecipesView extends RecipeView {
         resultsContainer.repaint();
     }
 
+    private void createFavSorter() {
+        List<Recipe> favourites = favoritesUsecase.getFavourites();
+        JPopupMenu sortMenu = new JPopupMenu();
+        sortMenu.add(new JLabel("Sort By:"));
+
+        JMenuItem defaultItem = new JMenuItem("Default");
+        defaultItem.addActionListener(e -> {
+            List<Recipe> unsortedFavs = favoritesUsecase.getFavourites();
+            displayFavorites(unsortedFavs);
+        });
+        sortMenu.add(defaultItem);
+
+        JMenuItem favItem = new JMenuItem("Favourites");
+        favItem.addActionListener(e -> {
+            RecipeSorterUseCase favSort = new RecipeSorterUseCase("favs");
+            favSort.sortRecipes(favourites);
+            displayFavorites(favourites);
+        });
+        sortMenu.add(favItem);
+
+        JMenuItem ingredientItem = new JMenuItem("Least Ingredients");
+        ingredientItem.addActionListener(e -> {
+            RecipeSorterUseCase ingredientSort = new RecipeSorterUseCase("ingredients");
+            ingredientSort.sortRecipes(favourites);
+            displayFavorites(favourites);
+        });
+        sortMenu.add(ingredientItem);
+
+        JMenuItem timeItem = new JMenuItem("Least Prep Time");
+        timeItem.addActionListener(e -> {
+            RecipeSorterUseCase timeSort = new RecipeSorterUseCase("time");
+            timeSort.sortRecipes(favourites);
+            displayFavorites(favourites);
+        });
+        sortMenu.add(timeItem);
+
+        JMenuItem leastCalItem = new JMenuItem("Least Calories");
+        leastCalItem.addActionListener(e -> {
+            RecipeSorterUseCase leastCalSort = new RecipeSorterUseCase("caloriesAscending");
+            leastCalSort.sortRecipes(favourites);
+            displayFavorites(favourites);
+        });
+        sortMenu.add(leastCalItem);
+
+        JMenuItem mostCalItem = new JMenuItem("Most Calories");
+        mostCalItem.addActionListener(e -> {
+            RecipeSorterUseCase mostCalSort = new RecipeSorterUseCase("caloriesDescending");
+            mostCalSort.sortRecipes(favourites);
+            displayFavorites(favourites);
+        });
+        sortMenu.add(mostCalItem);
+
+        JMenuItem mostProtItem = new JMenuItem("Most Protein");
+        mostProtItem.addActionListener(e -> {
+            RecipeSorterUseCase mostProtSort = new RecipeSorterUseCase("proteinDescending");
+            mostProtSort.sortRecipes(favourites);
+            displayFavorites(favourites);
+        });
+        sortMenu.add(mostProtItem);
+
+        JMenuItem leastFatItem = new JMenuItem("Least Fat");
+        leastFatItem.addActionListener(e -> {
+            RecipeSorterUseCase leastFatSort = new RecipeSorterUseCase("fatAscending");
+            leastFatSort.sortRecipes(favourites);
+            displayFavorites(favourites);
+        });
+        sortMenu.add(leastFatItem);
+
+        JMenuItem leastSugarItem = new JMenuItem("Least Sugar");
+        leastSugarItem.addActionListener(e -> {
+            RecipeSorterUseCase leastSugarSort = new RecipeSorterUseCase("sugarAscending");
+            leastSugarSort.sortRecipes(favourites);
+            displayFavorites(favourites);
+        });
+        sortMenu.add(leastSugarItem);
+
+        String[] types = {
+                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks",
+                "Asian", "British", "Caribbean", "Central Europe", "Chinese", "Eastern Europe",
+                "French", "Greek", "Indian", "Italian", "Japanese", "Korean", "Kosher",
+                "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "South American", "South East Asian"
+        };
+
+        for (String type : types) {
+            String menuItemLabel = type + " First";
+            String sorterType = "type" + type;
+
+            JMenuItem menuItem = new JMenuItem(menuItemLabel);
+            menuItem.addActionListener(e -> {
+                RecipeSorterUseCase sorter = new RecipeSorterUseCase(sorterType);
+                sorter.sortRecipes(favourites);
+                displayFavorites(favourites);
+            });
+            sortMenu.add(menuItem);
+        }
+
+        sortButton.addActionListener(e -> {
+            sortMenu.show(sortButton, 0, sortButton.getHeight() + 200);
+        });
+    }
 }
