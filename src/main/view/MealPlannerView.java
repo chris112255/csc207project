@@ -1,6 +1,7 @@
 package main.view;
 
 import usecase.FavouritesUsecase;
+import usecase.MealPlannerUsecase;
 import usecase.SearchRecipesUsecase;
 import entity.Recipe;
 
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 public class MealPlannerView {
-
     private final SearchRecipesUsecase searchRecipesUseCase = new SearchRecipesUsecase();
     String title = "Meal Planner";
     JFrame frame = new JFrame(title);
@@ -20,11 +20,13 @@ public class MealPlannerView {
     JTextField minCalories = new JTextField("10");
     JTextField minProtein = new JTextField("10");
     JTextField maxCarbs = new JTextField("10");
+    JTextField maxFat = new JTextField("10");
     JButton saveButton = new JButton("Save");
+    private MealPlannerUsecase mealPlannerUsecase;
 
-    public MealPlannerView() {
+    public MealPlannerView(MealPlannerUsecase mpUsecase) {
+        mealPlannerUsecase = mpUsecase;
         createView();
-
     }
 
     private void createView() {
@@ -51,10 +53,28 @@ public class MealPlannerView {
         JPanel mealsPanel = new JPanel();
         mealsPanel.setLayout(new BoxLayout(mealsPanel, BoxLayout.Y_AXIS));
         JLabel titleLabel = new JLabel("Selected Meals");
-        JLabel meal = new JLabel("Meal1");
-        // create meals based on how much in thing
         mealsPanel.add(titleLabel);
-        mealsPanel.add(meal);
+
+        for (int i = 0; i < mealPlannerUsecase.getMeals().size(); i++) {
+            JPanel mealPanel = new JPanel();
+
+            JLabel mealLabel = new JLabel(mealPlannerUsecase.getMeals().get(i).getName());
+            JButton removeMealButton = new JButton("Remove Meal");
+            int finalI = i;
+            removeMealButton.addActionListener(e -> {
+                mealPlannerUsecase.removeFromPlanner(mealPlannerUsecase.getMeals().get(finalI));
+                mealsPanel.remove(mealPanel);
+                mealsPanel.revalidate();
+                mealsPanel.repaint();
+            });
+
+            mealPanel.add(mealLabel);
+            mealPanel.add(removeMealButton);
+            mealsPanel.add(mealPanel);
+        }
+
+        //System.out.println(mealPlannerUsecase.getMeals().get(0).getName());
+
         panel.add(mealsPanel);
         return panel;
     }
@@ -64,11 +84,21 @@ public class MealPlannerView {
 
         JPanel totalMacrosPanel = new JPanel();
         totalMacrosPanel.setLayout(new BoxLayout(totalMacrosPanel, BoxLayout.Y_AXIS));
+        List<Recipe> plannedMeals = mealPlannerUsecase.getMeals();
+
         JLabel titleLabel = new JLabel("Total Macros");
-        JLabel calories = new JLabel("Calories: ");
+        JLabel calories = new JLabel("Calories: " + mealPlannerUsecase.getTotalCalories());
+        JLabel carbs = new JLabel("Carbohydrates: " + mealPlannerUsecase.getTotalCarbs());
+        JLabel fat = new JLabel("Fat: " + mealPlannerUsecase.getTotalFat());
+        JLabel protein = new JLabel("Protein: " + mealPlannerUsecase.getTotalProtein());
+
         // create meals based on how much in thing
         totalMacrosPanel.add(titleLabel);
         totalMacrosPanel.add(calories);
+        totalMacrosPanel.add(carbs);
+        totalMacrosPanel.add(fat);
+        totalMacrosPanel.add(protein);
+
         panel.add(totalMacrosPanel);
         return panel;
     }
@@ -87,7 +117,7 @@ public class MealPlannerView {
         JButton homeButton = new JButton("Home");
         homeButton.addActionListener(e -> {
             frame.dispose();
-            new HomePageView();
+            new HomePageView(mealPlannerUsecase);
         });
         JLabel label = new JLabel(this.title);
         panel.add(homeButton);
@@ -116,6 +146,10 @@ public class MealPlannerView {
         maxCarbs = new JTextField(8);
         JPanel carbsPanel = createInputBox("Max Carbs", maxCarbs);
         inputBoxes.add(carbsPanel);
+
+        maxFat = new JTextField(8);
+        JPanel fatPanel = createInputBox("Max Fat", maxFat);
+        inputBoxes.add(fatPanel);
 
         minProtein = new JTextField(8);
         JPanel proteinPanel = createInputBox("Max Protein", minProtein);
