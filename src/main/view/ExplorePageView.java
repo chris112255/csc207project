@@ -23,7 +23,6 @@ public class ExplorePageView extends RecipeView {
     //private final MealPlannerUsecase mealPlannerUsecase = new MealPlannerUsecase();
 
     private final int RECIPES_PER_PAGE = 8;
-    //private MealPlannerUsecase mealPlannerUseCase;
 
     public ExplorePageView(MealPlannerUsecase mpUseCase) {
         super("Explore Page", mpUseCase);
@@ -89,10 +88,12 @@ public class ExplorePageView extends RecipeView {
                 recipePanel.setBorder(BorderFactory.createEtchedBorder());
 
                 JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
+                recipeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
                 recipeButton.setPreferredSize(new Dimension(180, 60));
                 recipeButton.addActionListener(e -> new SingleRecipeView(recipe));
 
                 JButton favoriteButton = new JButton("Add to Favorites");
+                favoriteButton.setAlignmentX(Component.CENTER_ALIGNMENT);
                 favoriteButton.setPreferredSize(new Dimension(180, 30));
 
                 if (favouritesUsecase.isFavourite(recipe)) {
@@ -115,8 +116,23 @@ public class ExplorePageView extends RecipeView {
                     }
                 });
 
+                JButton addToMealPlanButton = new JButton("Add to Meal Plan");
+                addToMealPlanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+                addToMealPlanButton.addActionListener(e -> {
+                    if(mealPlannerUseCase.isSelected(recipe)) {
+                        mealPlannerUseCase.removeFromPlanner(recipe);
+                        addToMealPlanButton.setText("Add to Meal Plan");
+                    }
+                    else {
+                        mealPlannerUseCase.addToPlanner(recipe);
+                        addToMealPlanButton.setText("Remove from Meal Plan");
+                    }
+                });
+
                 recipePanel.add(recipeButton);
                 recipePanel.add(favoriteButton);
+                recipePanel.add(addToMealPlanButton);
                 resultsContainer.add(recipePanel);
             }
         }
