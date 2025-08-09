@@ -157,14 +157,40 @@ public class MealPlannerView {
         JPanel proteinPanel = createInputBox("Min Protein", minProtein);
         inputBoxes.add(proteinPanel);
 
-        saveButton = new JButton("Save");
+        saveButton = new JButton("Calculate");
 
         saveButton.addActionListener(e -> {
-            int minCaloriesVal = Integer.parseInt(minCalories.getText());
-            int maxCaloriesVal = Integer.parseInt(maxCalories.getText());
-            int maxCarbsVal = Integer.parseInt(maxCarbs.getText());
-            int maxFatVal = Integer.parseInt(maxFat.getText());
-            int minProteinVal = Integer.parseInt(minProtein.getText());
+            int minCaloriesVal;
+            int maxCaloriesVal;
+            int maxCarbsVal;
+            int maxFatVal;
+            int minProteinVal;
+
+            try{
+                minCaloriesVal = Integer.parseInt(minCalories.getText());
+            } catch (NumberFormatException ex){
+                minCaloriesVal = 0;
+            }
+            try{
+                maxCaloriesVal = Integer.parseInt(maxCalories.getText());
+            } catch (NumberFormatException ex){
+                maxCaloriesVal = 0;
+            }
+            try{
+                maxCarbsVal = Integer.parseInt(maxCarbs.getText());
+            } catch (NumberFormatException ex){
+                maxCarbsVal = 0;
+            }
+            try{
+                maxFatVal = Integer.parseInt(maxFat.getText());
+            } catch (NumberFormatException ex){
+                maxFatVal = 0;
+            }
+            try{
+                minProteinVal = Integer.parseInt(minProtein.getText());
+            } catch (NumberFormatException ex){
+                minProteinVal = 0;
+            }
 
             resultsCalories.setText(mealPlannerUsecase.calculateCalories(minCaloriesVal, maxCaloriesVal));
             resultsCarbs.setText(mealPlannerUsecase.calculateCarbs(maxCarbsVal));
