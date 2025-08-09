@@ -2,20 +2,24 @@ package entity;
 
 public class Nutrients {
 
-    private final int calories;
-    private final double protein;
-    private final double fat;
-    private final double sugar;
-    private final double sodium;
-    private final double carbs;
+    private int calories;
+    private double protein;
+    private double fat;
+    private double sugar;
+    private double sodium;
+    private double carbs;
 
-    public Nutrients(int calories, double protein, double fat, double sugar, double sodium) {
+    private double roundTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
+
+    public Nutrients(int calories, double protein, double fat, double sugar, double sodium, double carbs) {
         this.calories = calories;
-        this.protein = protein;
-        this.fat = fat;
-        this.sugar = sugar;
-        this.sodium = sodium;
-        this.carbs = 0;
+        this.protein = roundTwoDecimals(protein);
+        this.fat = roundTwoDecimals(fat);
+        this.sugar = roundTwoDecimals(sugar);
+        this.sodium = roundTwoDecimals(sodium);
+        this.carbs = roundTwoDecimals(carbs);
     }
 
     public int getCalories() {

@@ -18,6 +18,7 @@ public class Recipe {
     private final String dishType;
     private final String sourceUrl;
     private final String imageUrl;
+    private final String warnings;
 
     // === Full Constructor ===
     public Recipe(String name, String mainIngredient, List<String> ingredients,
@@ -37,6 +38,7 @@ public class Recipe {
         this.dishType = dishType;
         this.sourceUrl = sourceUrl;
         this.imageUrl = imageUrl;
+        this.warnings = this.calcWarnings();
     }
 
     // === Constructor used by EdamamRecipeSearchGateway (UPDATED to include imageUrl) ===
@@ -51,6 +53,7 @@ public class Recipe {
     // === Minimal Constructor used by SearchRecipesUseCase ===
     public Recipe(String name, String imageUrl, String sourceUrl) {
         this.name = name;
+        this.warnings = this.calcWarnings();
         this.mainIngredient = "";
         this.ingredients = new ArrayList<>();
         this.instructions = "";
@@ -65,7 +68,31 @@ public class Recipe {
         this.imageUrl = imageUrl;
     }
 
+    private String calcWarnings(){
+        String warnings = "High in";
+        if(this.getNutriSodium() > 800){
+            warnings += " sodium";
+        }
+        if(this.getNutriCalories() > 800){
+            warnings += " calories";
+        }
+        if(this.getNutriSugar() > 10){
+            warnings += " sugar";
+        }
+        if(this.getNutriFat() > 25){
+            warnings += " fat";
+        }
+        if(this.getNutriCarbs() > 100){
+            warnings += " carbs";
+        }
+        if(warnings.equals("High")){return "None";}
+        return warnings;
+    }
+
     // === Getters ===
+    public String getWarnings(){
+        return this.warnings;
+    }
 
     public String getName() {
         return name;
