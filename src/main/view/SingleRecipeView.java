@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.AbstractMap;
 import java.util.List;
 
 public class SingleRecipeView {
@@ -39,11 +40,15 @@ public class SingleRecipeView {
     private JPanel createRecipeInfo() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        JLabel cookTime = new JLabel("Cook Time: " + recipe.getPrepTime());
-        JLabel ingredients = new JLabel("Ingredients: " + recipe.getIngredients());
+        JLabel cookTime = new JLabel("Cook Time (minutes): " + recipe.getPrepTime());
+        JLabel ingredients = new JLabel("<html> Ingredients: " + recipe.getIngredients() + "</html>");
         panel.add(cookTime);
         panel.add(ingredients);
         return panel;
+    }
+
+    private float roundTwoDecimals(double value) {
+        return Math.round(value * 100) / 100f;
     }
 
     private JPanel createNutritionalInfoPanel() {
@@ -53,15 +58,15 @@ public class SingleRecipeView {
         JLabel nutritionalInfo = new JLabel("Nutritional Information");
         panel.add(nutritionalInfo);
 
-        JLabel caloriesLabel = new JLabel("Calories: " + recipe.getNutriCalories());
+        JLabel caloriesLabel = new JLabel("Calories: " + roundTwoDecimals(recipe.getNutriCalories()));
         panel.add(caloriesLabel);
 
-        JLabel macrosLabel = new JLabel("Protein: " + recipe.getNutriProtein() +
-                "Carbohydrates: " + recipe.getNutriSugar() + "Fat: " +
-                recipe.getNutriFat());
+        JLabel macrosLabel = new JLabel("<html>Protein (g): " + roundTwoDecimals(recipe.getNutriProtein()) +
+                "<br>Carbohydrates: (g)" + roundTwoDecimals(recipe.getNutriSugar()) + "<br>Fat (g): " +
+                roundTwoDecimals(recipe.getNutriFat()) + "</html>");
         panel.add(macrosLabel);
 
-        JLabel sodiumLabel = new JLabel("Sodium: " + recipe.getNutriSodium());
+        JLabel sodiumLabel = new JLabel("Sodium (mg): " + roundTwoDecimals(recipe.getNutriSodium()));
         panel.add(sodiumLabel);
 
         JLabel warningsLabel = new JLabel("Nutritional Warnings: ");
@@ -72,7 +77,7 @@ public class SingleRecipeView {
 
     private void createView() {
         JFrame frame = new JFrame();
-        frame.setSize(500, 600);
+        frame.setSize(500, 700);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();

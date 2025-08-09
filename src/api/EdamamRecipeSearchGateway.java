@@ -107,6 +107,8 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
             }
 
             JSONObject totalNutrients = recipeJson.optJSONObject("totalNutrients");
+            //System.out.println("Total Nutrients");
+
             Nutrients nutrients = new Nutrients(
                     (int) recipeJson.optDouble("calories", 0),
                     totalNutrients.optJSONObject("PROCNT").optDouble("quantity", 0),
