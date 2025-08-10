@@ -1,5 +1,7 @@
 package entity;
 
+import org.json.JSONObject;
+
 public class Nutrients {
 
     private int calories;
@@ -8,6 +10,7 @@ public class Nutrients {
     private double sugar;
     private double sodium;
     private double carbs;
+    private String url;
 
     private double roundTwoDecimals(double value) {
         return Math.round(value * 100.0) / 100.0;
@@ -45,4 +48,6 @@ public class Nutrients {
     public double getCarbs() {
         return carbs;
     }
+
+    public String getUrl() {return url;}
 }

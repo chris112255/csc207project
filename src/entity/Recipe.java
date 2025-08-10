@@ -19,12 +19,13 @@ public class Recipe {
     private final String sourceUrl;
     private final String imageUrl;
     private final String warnings;
+    private final String uri;
 
     // === Full Constructor ===
     public Recipe(String name, String mainIngredient, List<String> ingredients,
                   String instructions, int ingredientCount, List<String> dietType,
                   Nutrients nutrients, double prepTime, String cuisineType,
-                  String mealType, String dishType, String sourceUrl, String imageUrl) {
+                  String mealType, String dishType, String sourceUrl, String imageUrl, String uri) {
         this.name = name;
         this.mainIngredient = mainIngredient;
         this.ingredients = ingredients;
@@ -38,34 +39,8 @@ public class Recipe {
         this.dishType = dishType;
         this.sourceUrl = sourceUrl;
         this.imageUrl = imageUrl;
+        this.uri = uri;
         this.warnings = this.calcWarnings();
-    }
-
-    // === Constructor used by EdamamRecipeSearchGateway (UPDATED to include imageUrl) ===
-    public Recipe(String name, String mainIngredient, List<String> ingredients,
-                  String instructions, int ingredientCount, List<String> dietType,
-                  Nutrients nutrients, double prepTime, String cuisineType,
-                  String mealType, String dishType, String sourceUrl, String imageUrl, boolean fromEdamam) {
-        this(name, mainIngredient, ingredients, instructions, ingredientCount, dietType,
-                nutrients, prepTime, cuisineType, mealType, dishType, sourceUrl, imageUrl);
-    }
-
-    // === Minimal Constructor used by SearchRecipesUseCase ===
-    public Recipe(String name, String imageUrl, String sourceUrl) {
-        this.name = name;
-        this.warnings = this.calcWarnings();
-        this.mainIngredient = "";
-        this.ingredients = new ArrayList<>();
-        this.instructions = "";
-        this.ingredientCount = 0;
-        this.dietType = new ArrayList<>();
-        this.nutrients = null;
-        this.prepTime = 0.0;
-        this.cuisineType = "";
-        this.mealType = "";
-        this.dishType = "";
-        this.sourceUrl = sourceUrl;
-        this.imageUrl = imageUrl;
     }
 
     private String calcWarnings(){
@@ -85,7 +60,7 @@ public class Recipe {
         if(this.getNutriCarbs() > 100){
             warnings += " carbs";
         }
-        if(warnings.equals("High")){return "None";}
+        if(warnings.equals("High in")){return "None";}
         return warnings;
     }
 
@@ -165,6 +140,8 @@ public class Recipe {
     public String getImageUrl() {
         return (imageUrl != null) ? imageUrl : "";
     }
+
+    public String getUri() {return uri;}
 
     public double getNutriCarbs() {return (nutrients != null) ? nutrients.getCarbs() : 0; }
 }

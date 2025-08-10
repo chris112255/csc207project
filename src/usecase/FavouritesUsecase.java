@@ -1,5 +1,6 @@
 package usecase;
 
+import api.EdamamRecipeSearchGateway;
 import entity.Recipe;
 import java.io.*;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class FavouritesUsecase {
     private void savefavourites() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(favouritesFile))) {
             for (Recipe recipe : favourites) {
-                writer.println(recipe.getName() + "|" + recipe.getImageUrl() + "|" + recipe.getSourceUrl());
+                writer.println(recipe.getName() + "|" + recipe.getUri());
             }
         } catch (IOException e) {
             System.err.println("Error saving favourites: " + e.getMessage());
@@ -90,12 +91,16 @@ public class FavouritesUsecase {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\|", 3);
-                System.out.println(parts.length);
-                if (parts.length == 3) {
+                //System.out.println(parts.length);
+
+                EdamamRecipeSearchGateway gateway = new EdamamRecipeSearchGateway();
+
+                if (parts.length == 2) {
                     String title = parts[0];
-                    String imageUrl = parts[1];
-                    String sourceUrl = parts[2];
-                    favourites.add(new Recipe(title, imageUrl, sourceUrl));
+                    String uri = parts[1];
+                    Recipe recipe = gateway.recipeLookup(uri);
+
+                    favourites.add(recipe);
                 }
             }
             System.out.println("Loaded " + favourites.size() + " favourites from file");
