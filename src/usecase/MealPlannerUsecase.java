@@ -21,7 +21,9 @@ public class MealPlannerUsecase {
     }
 
     public void addToPlanner(Recipe recipe) {
-        selectedMeals.add(recipe);
+        if (!selectedMeals.contains(recipe)) {
+            selectedMeals.add(recipe);
+        }
         System.out.println(selectedMeals.size());
     }
 

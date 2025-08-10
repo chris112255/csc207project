@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 public class RecipeSorterUseCase {
 
     private final String sortingCriteria;
-    FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
+    public FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
 
     public RecipeSorterUseCase(String sortingCriteria) {
         this.sortingCriteria = sortingCriteria;
@@ -65,15 +65,28 @@ public class RecipeSorterUseCase {
     }
 
     private List<Recipe> typeSorter(List<Recipe> recipes, String type) {
+        System.out.println("=== Sorting by type: " + type + " ===");
+
         ArrayList<Recipe> priority = new ArrayList<>();
         ArrayList<Recipe> nonPriority = new ArrayList<>();
+
         for (Recipe r : recipes) {
-            if (r.getDishType().equals(type) || r.getMealType().equals(type) ||
-                    r.getCuisineType().equals(type) || r.getDietType().equals(type)) {
-                priority.add(r);
-            }
-            else {nonPriority.add(r);}
+            boolean matches = type.equalsIgnoreCase(r.getDishType())
+                    || type.equalsIgnoreCase(r.getMealType())
+                    || type.equalsIgnoreCase(r.getCuisineType())
+                    || r.getDietType().stream().anyMatch(d -> d.equalsIgnoreCase(type));
+
+            System.out.println(r.getName() +
+                    " | Dish: " + r.getDishType() +
+                    " | Meal: " + r.getMealType() +
+                    " | Cuisine: " + r.getCuisineType() +
+                    " | Diets: " + r.getDietType() +
+                    " | Matches: " + matches);
+
+            if (matches) priority.add(r);
+            else nonPriority.add(r);
         }
+
         priority.addAll(nonPriority);
         return priority;
     }
@@ -129,14 +142,24 @@ public class RecipeSorterUseCase {
         HashMap<Recipe, Integer> recipeScores = new HashMap<>();
         for (Recipe r : recipes) {
             Integer recipeScore = 0;
-            recipeScore += cuisineCounter.get(r.getCuisineType()) * 10;
-            recipeScore += mainIngredientCounter.get(r.getMainIngredient()) * 12;
-            recipeScore += dishTypeCounter.get(r.getDishType()) * 6;
+            if (cuisineCounter.get(r.getCuisineType()) != null) {
+                recipeScore += cuisineCounter.get(r.getCuisineType()) * 10;
+            }
+            if (mainIngredientCounter.get(r.getMainIngredient()) != null) {
+                recipeScore += mainIngredientCounter.get(r.getMainIngredient()) * 12;
+            }
+            if (dishTypeCounter.get(r.getDishType()) != null) {
+                recipeScore += dishTypeCounter.get(r.getDishType()) * 6;
+            }
             for (String d : r.getDietType()) {
-                recipeScore += dietCounter.get(d) * 8;
+                if (dietCounter.containsKey(d)) {
+                    recipeScore += dietCounter.get(d) * 8;
+                }
             }
             for (String i : r.getIngredients()) {
-                recipeScore += ingredientsCounter.get(i);
+                if (ingredientsCounter.containsKey(i)) {
+                    recipeScore += ingredientsCounter.get(i) * 4;
+                }
             }
             recipeScores.put(r, recipeScore);
         }

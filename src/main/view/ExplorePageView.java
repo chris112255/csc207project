@@ -152,7 +152,7 @@ public class ExplorePageView extends RecipeView {
     private void createResultSorter(List<Recipe> recipes) {
         List<Recipe> results = new ArrayList<>(recipes);
         List<Recipe> unsortedResults = new ArrayList<>();
-        unsortedResults.addAll(results);
+        unsortedResults.addAll(recipes);
         JPopupMenu sortMenu = new JPopupMenu();
         sortMenu.add(new JLabel("Sort By:"));
 
@@ -227,21 +227,19 @@ public class ExplorePageView extends RecipeView {
         sortMenu.add(leastSugarItem);
 
         String[] types = {
-                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks",
-                "Asian", "British", "Caribbean", "Central Europe", "Chinese", "Eastern Europe",
-                "French", "Greek", "Indian", "Italian", "Japanese", "Korean", "Kosher",
-                "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "South American", "South East Asian"
+                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks", "American",
+                "Asian", "British", "Caribbean", "Central Europe", "Chinese",
+                "Eastern Europe", "French", "Greek", "Indian", "Italian",
+                "Japanese", "Korean", "Kosher", "Mediterranean", "Mexican",
+                "Middle Eastern", "Nordic", "South American", "South East Asian"
         };
 
         for (String type : types) {
-            String menuItemLabel = type + " First";
-            String sorterType = "type" + type;
-
-            JMenuItem menuItem = new JMenuItem(menuItemLabel);
+            JMenuItem menuItem = new JMenuItem(type + " First");
             menuItem.addActionListener(e -> {
-                RecipeSorterUseCase sorter = new RecipeSorterUseCase(sorterType);
-                sorter.sortRecipes(results);
-                updateResults(results);
+                List<Recipe> freshCopy = new ArrayList<>(recipes);
+                new RecipeSorterUseCase("type" + type).sortRecipes(freshCopy);
+                updateResults(freshCopy);
             });
             sortMenu.add(menuItem);
         }
