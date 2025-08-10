@@ -19,12 +19,12 @@ public class SavedRecipesView extends RecipeView {
     public SavedRecipesView(MealPlannerUsecase mpUseCase) {
         super("Saved Recipes", mpUseCase);
         loadFavorites();
-        createFavSorter();
         searchButton.addActionListener(e -> {
             Map<String, String> filters = getFilterCriteria();
             List<Recipe> filteredFavorites = filterFavorites(originalFavorites, filters);
             displayFavorites(filteredFavorites);
         });
+        createFavSorter();
     }
     /**
      * Get filter options from GUI
@@ -267,14 +267,6 @@ public class SavedRecipesView extends RecipeView {
         });
         sortMenu.add(defaultItem);
 
-        JMenuItem favItem = new JMenuItem("Similar to Favourites");
-        favItem.addActionListener(e -> {
-            RecipeSorterUseCase favSort = new RecipeSorterUseCase("favs");
-            favSort.sortRecipes(favourites);
-            displayFavorites(favourites);
-        });
-        sortMenu.add(favItem);
-
         JMenuItem ingredientItem = new JMenuItem("Least Ingredients");
         ingredientItem.addActionListener(e -> {
             RecipeSorterUseCase ingredientSort = new RecipeSorterUseCase("ingredients");
@@ -332,7 +324,7 @@ public class SavedRecipesView extends RecipeView {
         sortMenu.add(leastSugarItem);
 
         String[] types = {
-                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks",
+                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks", "American",
                 "Asian", "British", "Caribbean", "Central Europe", "Chinese", "Eastern Europe",
                 "French", "Greek", "Indian", "Italian", "Japanese", "Korean", "Kosher",
                 "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "South American", "South East Asian"
