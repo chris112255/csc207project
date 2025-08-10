@@ -90,6 +90,7 @@ public class FavouritesUsecase {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\|", 3);
+                System.out.println(parts.length);
                 if (parts.length == 3) {
                     String title = parts[0];
                     String imageUrl = parts[1];

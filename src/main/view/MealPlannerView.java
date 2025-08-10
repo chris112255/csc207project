@@ -22,6 +22,12 @@ public class MealPlannerView {
     JTextField maxCarbs = new JTextField("10");
     JTextField maxFat = new JTextField("10");
     JButton saveButton = new JButton("Save");
+    JLabel resultsCalories = new JLabel("");
+    JLabel resultsProtein = new JLabel("");
+    JLabel resultsCarbs = new JLabel("");
+    JLabel resultsFat = new JLabel("");
+    JPanel resultsPanel = new JPanel();
+
     private MealPlannerUsecase mealPlannerUsecase;
 
     public MealPlannerView(MealPlannerUsecase mpUsecase) {
@@ -86,19 +92,15 @@ public class MealPlannerView {
         totalMacrosPanel.setLayout(new BoxLayout(totalMacrosPanel, BoxLayout.Y_AXIS));
         List<Recipe> plannedMeals = mealPlannerUsecase.getMeals();
 
-        JLabel titleLabel = new JLabel("Total Macros");
-        JLabel calories = new JLabel("Calories: " + mealPlannerUsecase.getTotalCalories());
-        JLabel carbs = new JLabel("Carbohydrates: " + mealPlannerUsecase.getTotalCarbs());
-        JLabel fat = new JLabel("Fat: " + mealPlannerUsecase.getTotalFat());
-        JLabel protein = new JLabel("Protein: " + mealPlannerUsecase.getTotalProtein());
+        JLabel titleLabel = new JLabel("Macros");
 
-        // create meals based on how much in thing
         totalMacrosPanel.add(titleLabel);
-        totalMacrosPanel.add(calories);
-        totalMacrosPanel.add(carbs);
-        totalMacrosPanel.add(fat);
-        totalMacrosPanel.add(protein);
-
+        resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
+        resultsPanel.add(resultsCalories);
+        resultsPanel.add(resultsProtein);
+        resultsPanel.add(resultsCarbs);
+        resultsPanel.add(resultsFat);
+        totalMacrosPanel.add(resultsPanel);
         panel.add(totalMacrosPanel);
         return panel;
     }
@@ -152,10 +154,53 @@ public class MealPlannerView {
         inputBoxes.add(fatPanel);
 
         minProtein = new JTextField(8);
-        JPanel proteinPanel = createInputBox("Max Protein", minProtein);
+        JPanel proteinPanel = createInputBox("Min Protein", minProtein);
         inputBoxes.add(proteinPanel);
 
-        saveButton = new JButton("Save");
+        saveButton = new JButton("Calculate");
+
+        saveButton.addActionListener(e -> {
+            int minCaloriesVal;
+            int maxCaloriesVal;
+            int maxCarbsVal;
+            int maxFatVal;
+            int minProteinVal;
+
+            try{
+                minCaloriesVal = Integer.parseInt(minCalories.getText());
+            } catch (NumberFormatException ex){
+                minCaloriesVal = 0;
+            }
+            try{
+                maxCaloriesVal = Integer.parseInt(maxCalories.getText());
+            } catch (NumberFormatException ex){
+                maxCaloriesVal = 0;
+            }
+            try{
+                maxCarbsVal = Integer.parseInt(maxCarbs.getText());
+            } catch (NumberFormatException ex){
+                maxCarbsVal = 0;
+            }
+            try{
+                maxFatVal = Integer.parseInt(maxFat.getText());
+            } catch (NumberFormatException ex){
+                maxFatVal = 0;
+            }
+            try{
+                minProteinVal = Integer.parseInt(minProtein.getText());
+            } catch (NumberFormatException ex){
+                minProteinVal = 0;
+            }
+
+            resultsCalories.setText(mealPlannerUsecase.calculateCalories(minCaloriesVal, maxCaloriesVal));
+            resultsCarbs.setText(mealPlannerUsecase.calculateCarbs(maxCarbsVal));
+            resultsFat.setText(mealPlannerUsecase.calculateFat(maxFatVal));
+            resultsProtein.setText(mealPlannerUsecase.calculateProtein(minProteinVal));
+
+            resultsPanel.invalidate();
+            resultsPanel.repaint();
+        });
+
         inputBoxes.add(saveButton);
 
         panel.add(inputBoxes);

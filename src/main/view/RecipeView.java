@@ -74,7 +74,7 @@ public class RecipeView {
         panel.add(createInputBox("Max Calories", maxCalories));
 
         protein = new JTextField(5);
-        panel.add(createInputBox("Protein", protein));
+        panel.add(createInputBox("Min Protein", protein));
 
         maxFat = new JTextField(5);
         panel.add(createInputBox("Max Fats", maxFat));

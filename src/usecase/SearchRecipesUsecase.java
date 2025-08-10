@@ -77,8 +77,18 @@ public class SearchRecipesUsecase {
                         String nutrientCode = getNutrientCode(key);
                         if (nutrientCode != null) {
                             // Format as range: 0-maxValue
-                            urlBuilder.append("&nutrients%5B").append(nutrientCode)
-                                    .append("%5D=0-").append(URLEncoder.encode(value, "UTF-8"));
+                            //System.out.println(urlBuilder.append("&nutrients%5B").append(nutrientCode)
+                             //       .append("%5D=").append(URLEncoder.encode(value, "UTF-8")).append("+"));
+//                            if(key.equals("protein")) {
+//                                String minValuePlus = value + "+";
+//                                System.out.println(minValuePlus);
+//                                urlBuilder.append("&nutrients%5B").append(nutrientCode)
+//                                        .append("%5D=").append(URLEncoder.encode(minValuePlus, "UTF-8"));
+//                            }
+//                            else {
+                                urlBuilder.append("&nutrients%5B").append(nutrientCode)
+                                        .append("%5D=").append(URLEncoder.encode(value, "UTF-8"));
+                            //}
                         }
                     }
                 }
@@ -182,7 +192,8 @@ public class SearchRecipesUsecase {
                         totalNutrients.optJSONObject("PROCNT").optDouble("quantity", 0),
                         totalNutrients.optJSONObject("FAT").optDouble("quantity", 0),
                         totalNutrients.optJSONObject("SUGAR").optDouble("quantity", 0),
-                        totalNutrients.optJSONObject("NA").optDouble("quantity", 0)
+                        totalNutrients.optJSONObject("NA").optDouble("quantity", 0),
+                        totalNutrients.optJSONObject("CHOCDF").optDouble("quantity", 0)
                 );
 
                 double prepTime = recipeJson.optDouble("totalTime", 0);

@@ -47,10 +47,6 @@ public class SingleRecipeView {
         return panel;
     }
 
-    private float roundTwoDecimals(double value) {
-        return Math.round(value * 100) / 100f;
-    }
-
     private JPanel createNutritionalInfoPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -58,18 +54,21 @@ public class SingleRecipeView {
         JLabel nutritionalInfo = new JLabel("Nutritional Information");
         panel.add(nutritionalInfo);
 
-        JLabel caloriesLabel = new JLabel("Calories: " + roundTwoDecimals(recipe.getNutriCalories()));
+        JLabel caloriesLabel = new JLabel("Calories: " + recipe.getNutriCalories());
         panel.add(caloriesLabel);
 
-        JLabel macrosLabel = new JLabel("<html>Protein (g): " + roundTwoDecimals(recipe.getNutriProtein()) +
-                "<br>Carbohydrates: (g)" + roundTwoDecimals(recipe.getNutriSugar()) + "<br>Fat (g): " +
-                roundTwoDecimals(recipe.getNutriFat()) + "</html>");
+        JLabel macrosLabel = new JLabel("<html>Protein (g): " + recipe.getNutriProtein() +
+                "<br>Carbohydrates (g): " + recipe.getNutriCarbs() + "<br>Fat (g): " +
+                recipe.getNutriFat() + "</html>");
         panel.add(macrosLabel);
 
-        JLabel sodiumLabel = new JLabel("Sodium (mg): " + roundTwoDecimals(recipe.getNutriSodium()));
+        JLabel sodiumLabel = new JLabel("Sodium (mg): " + recipe.getNutriSodium());
         panel.add(sodiumLabel);
 
-        JLabel warningsLabel = new JLabel("Nutritional Warnings: ");
+        JLabel sugarLabel = new JLabel("Sugar (g): " + recipe.getNutriSugar());
+        panel.add(sugarLabel);
+
+        JLabel warningsLabel = new JLabel("Nutritional Warnings: " + recipe.getWarnings());
         panel.add(warningsLabel);
 
         return panel;
@@ -160,6 +159,12 @@ public class SingleRecipeView {
         panel.add(nutritionalInfoPanel);
 
         panel.add(Box.createVerticalGlue());
+
+        controlBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        namePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        imagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        recipeInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        nutritionalInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         frame.add(panel);
         frame.setLocationRelativeTo(null);

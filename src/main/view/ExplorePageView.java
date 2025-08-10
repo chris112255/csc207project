@@ -54,6 +54,7 @@ public class ExplorePageView extends RecipeView {
 
         String minCal = minCalories.getText().trim();
         String maxCal = maxCalories.getText().trim();
+
         if (!minCal.isEmpty() || !maxCal.isEmpty()) {
             String calorieRange = (!minCal.isEmpty() && !maxCal.isEmpty()) ? minCal + "-" + maxCal
                     : (!minCal.isEmpty()) ? minCal + "+"
@@ -61,7 +62,14 @@ public class ExplorePageView extends RecipeView {
             filters.put("calories", calorieRange);
         }
 
-        addNutrientFilter(filters, "protein", protein.getText().trim());
+        //System.out.println("protein.getText().trim()+");
+
+        if(protein.getText().trim().isEmpty()){
+            addNutrientFilter(filters, "protein", protein.getText().trim());
+        }
+        else{
+            addNutrientFilter(filters, "protein", protein.getText() + "+".trim());
+        }
         addNutrientFilter(filters, "fat", maxFat.getText().trim());
         addNutrientFilter(filters, "sugar", maxSugar.getText().trim());
         addNutrientFilter(filters, "carbohydrates", maxCarbs.getText().trim());

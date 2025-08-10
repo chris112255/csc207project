@@ -114,7 +114,8 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
                     totalNutrients.optJSONObject("PROCNT").optDouble("quantity", 0),
                     totalNutrients.optJSONObject("FAT").optDouble("quantity", 0),
                     totalNutrients.optJSONObject("SUGAR").optDouble("quantity", 0),
-                    totalNutrients.optJSONObject("NA").optDouble("quantity", 0)
+                    totalNutrients.optJSONObject("NA").optDouble("quantity", 0),
+                    totalNutrients.optJSONObject("CHOCDF").optDouble("quantity", 0)
             );
 
             double prepTime = recipeJson.optDouble("totalTime", 0);
