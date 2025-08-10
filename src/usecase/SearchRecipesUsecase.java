@@ -1,5 +1,6 @@
 package usecase;
 
+import api.EdamamRecipeSearchGateway;
 import entity.Nutrients;
 import entity.Recipe;
 import org.json.JSONArray;
@@ -8,6 +9,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -157,11 +159,11 @@ public class SearchRecipesUsecase {
             }
 
             JSONArray hits = json.getJSONArray("hits");
+
             System.out.println("Processing " + hits.length() + " hits"); // Debug output
 
             for (int i = 0; i < hits.length(); i++) {
                 JSONObject recipeJson = hits.getJSONObject(i).getJSONObject("recipe");
-
                 String name = recipeJson.optString("label");
                 String mainIngredient = "N/A";
                 List<String> ingredients = new ArrayList<>();
@@ -185,7 +187,6 @@ public class SearchRecipesUsecase {
                 }
 
                 JSONObject totalNutrients = recipeJson.optJSONObject("totalNutrients");
-                //System.out.println("Total Nutrients");
 
                 Nutrients nutrients = new Nutrients(
                         (int) recipeJson.optDouble("calories", 0),
@@ -221,7 +222,7 @@ public class SearchRecipesUsecase {
                         dishType,
                         sourceUrl,
                         imageUrl,
-                        true
+                        recipeJson.optString("uri")
                 ));
             }
         } catch (Exception e) {
