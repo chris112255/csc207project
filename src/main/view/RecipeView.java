@@ -70,7 +70,8 @@ public class RecipeView {
         panel.add(createInputBox("Max Calories", maxCalories));
 
         protein = new JTextField(6);
-        panel.add(createInputBox("Protein (g max)", protein));
+        // CHANGED: label indicates minimum protein
+        panel.add(createInputBox("Protein (g min)", protein));
 
         maxFat = new JTextField(6);
         panel.add(createInputBox("Max Fat (g)", maxFat));

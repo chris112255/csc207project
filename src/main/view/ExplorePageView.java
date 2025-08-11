@@ -1,24 +1,27 @@
 package main.view;
 
-import usecase.FavouritesUsecase;
-import usecase.SearchRecipesUsecase;
-import usecase.MealPlannerUsecase;
+import api.EdamamRecipeSearchGateway;
 import entity.Recipe;
+import usecase.FavouritesUsecase;
+import usecase.MealPlannerUsecase;
+import usecase.search.SearchRecipesUseCase;
 import usecase.sort.RecipeSorterUseCase;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class ExplorePageView extends RecipeView {
 
-    private final SearchRecipesUsecase searchRecipesUseCase = new SearchRecipesUsecase();
-    private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
+    // DI-driven use case: inject the gateway
+    private final SearchRecipesUseCase searchRecipesUseCase =
+            new SearchRecipesUseCase(new EdamamRecipeSearchGateway());
 
+    private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
     private List<Recipe> currentResults = new ArrayList<>();
 
     public ExplorePageView(MealPlannerUsecase mpUseCase) {
@@ -27,20 +30,74 @@ public class ExplorePageView extends RecipeView {
         // Search
         searchButton.addActionListener(e -> {
             Map<String, String> filters = getSearchFilters();
-            List<Recipe> recipes = searchRecipesUseCase.execute(filters);
-            currentResults = new ArrayList<>(recipes);
+
+            // Parse comma-separated ingredients into tokens
+            String raw = primaryIngredient.getText().trim();
+            List<String> tokens = parseTokens(raw);
+
+            // Build a single Edamam 'q' using spaces (better recall),
+            // then strictly enforce AND client-side so every token must match.
+            if (!tokens.isEmpty()) {
+                filters.put("q", String.join(" ", tokens));
+            }
+
+            List<Recipe> results = searchRecipesUseCase.execute(filters);
+            if (!tokens.isEmpty()) {
+                results = filterByAllTokens(results, tokens);
+            }
+
+            currentResults = new ArrayList<>(results);
             updateResults(currentResults);
             createResultSorter(currentResults);
         });
     }
 
+    /** Split by comma, trim, and drop empties. */
+    private List<String> parseTokens(String raw) {
+        List<String> tokens = new ArrayList<>();
+        if (raw == null || raw.isEmpty()) return tokens;
+        for (String t : raw.split(",")) {
+            String s = t.trim();
+            if (!s.isEmpty()) tokens.add(s);
+        }
+        return tokens;
+    }
+
+    /** Keep only recipes that contain ALL tokens in name or ingredient lines (case-insensitive). */
+    private List<Recipe> filterByAllTokens(List<Recipe> recipes, List<String> tokens) {
+        if (recipes == null || recipes.isEmpty()) return recipes;
+        List<String> needles = new ArrayList<>();
+        for (String t : tokens) needles.add(t.toLowerCase());
+
+        List<Recipe> out = new ArrayList<>();
+        for (Recipe r : recipes) {
+            String name = (r.getName() != null) ? r.getName().toLowerCase() : "";
+            boolean all = true;
+            for (String needle : needles) {
+                boolean inName = name.contains(needle);
+                boolean inIngredients = false;
+                if (!inName && r.getIngredients() != null) {
+                    for (String line : r.getIngredients()) {
+                        if (line != null && line.toLowerCase().contains(needle)) {
+                            inIngredients = true;
+                            break;
+                        }
+                    }
+                }
+                if (!(inName || inIngredients)) {
+                    all = false;
+                    break;
+                }
+            }
+            if (all) out.add(r);
+        }
+        return out;
+    }
+
     private Map<String, String> getSearchFilters() {
         Map<String, String> filters = new HashMap<>();
 
-        String ingredient = primaryIngredient.getText().trim();
-        if (!ingredient.isEmpty()) {
-            filters.put("q", ingredient);
-        }
+        // NOTE: 'q' is set later after token parsing; we leave it out here.
 
         String selectedDiet = (String) dietTypeDropdown.getSelectedItem();
         if (selectedDiet != null && !selectedDiet.isEmpty()) {
@@ -56,7 +113,10 @@ public class ExplorePageView extends RecipeView {
             filters.put("calories", calorieRange);
         }
 
-        addNutrientFilter(filters, "protein", protein.getText().trim());
+        // protein is a MIN in the UI; gateway maps proteinMin -> PROCNT=VALUE+
+        addNutrientFilter(filters, "proteinMin", protein.getText().trim());
+
+        // Others are treated as MAX in the gateway (0-VALUE)
         addNutrientFilter(filters, "fat", maxFat.getText().trim());
         addNutrientFilter(filters, "sugar", maxSugar.getText().trim());
         addNutrientFilter(filters, "carbohydrates", maxCarbs.getText().trim());
@@ -81,28 +141,29 @@ public class ExplorePageView extends RecipeView {
                 JPanel card = new JPanel();
                 card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
                 card.setBorder(BorderFactory.createEtchedBorder());
-                card.setPreferredSize(new Dimension(240, 240));
+                card.setPreferredSize(new Dimension(240, 260));
 
-                // Thumbnail
-                try {
-                    String imgUrl = recipe.getImageUrl();
-                    if (imgUrl != null && !imgUrl.isEmpty()) {
-                        ImageIcon icon = new ImageIcon(new URL(imgUrl));
-                        Image scaled = icon.getImage().getScaledInstance(200, 130, Image.SCALE_SMOOTH);
-                        JLabel imageLabel = new JLabel(new ImageIcon(scaled));
-                        imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-                        card.add(Box.createVerticalStrut(6));
-                        card.add(imageLabel);
-                    } else {
-                        JLabel noImg = new JLabel("[No image]");
-                        noImg.setAlignmentX(Component.CENTER_ALIGNMENT);
-                        card.add(noImg);
+                // Thumbnail (safe load)
+                String imgUrl = recipe.getImageUrl();
+                JLabel imageLabel;
+                if (imgUrl != null && !imgUrl.isEmpty()) {
+                    try {
+                        BufferedImage img = ImageIO.read(new URL(imgUrl));
+                        if (img != null) {
+                            Image scaled = img.getScaledInstance(200, 130, Image.SCALE_SMOOTH);
+                            imageLabel = new JLabel(new ImageIcon(scaled));
+                        } else {
+                            imageLabel = new JLabel("[No image]");
+                        }
+                    } catch (Throwable ex) {
+                        imageLabel = new JLabel("[No image]");
                     }
-                } catch (Exception ex) {
-                    JLabel noImg = new JLabel("[No image]");
-                    noImg.setAlignmentX(Component.CENTER_ALIGNMENT);
-                    card.add(noImg);
+                } else {
+                    imageLabel = new JLabel("[No image]");
                 }
+                imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                card.add(Box.createVerticalStrut(6));
+                card.add(imageLabel);
 
                 // Title button
                 JButton openBtn = new JButton("<html><center>" + recipe.getName() + "</center></html>");

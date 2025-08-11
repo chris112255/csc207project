@@ -1,20 +1,14 @@
 package main.view;
 
-import usecase.FavouritesUsecase;
-import usecase.MealPlannerUsecase;
-import usecase.SearchRecipesUsecase;
 import entity.Recipe;
+import usecase.MealPlannerUsecase;
 
 import javax.swing.*;
 import java.awt.*;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MealPlannerView {
-    private final SearchRecipesUsecase searchRecipesUseCase = new SearchRecipesUsecase();
-    String title = "Meal Planner";
+    private final String title = "Meal Planner";
     JFrame frame = new JFrame(title);
     JTextField maxCalories = new JTextField("10");
     JTextField minCalories = new JTextField("10");
@@ -28,7 +22,7 @@ public class MealPlannerView {
     JLabel resultsFat = new JLabel("");
     JPanel resultsPanel = new JPanel();
 
-    private MealPlannerUsecase mealPlannerUsecase;
+    private final MealPlannerUsecase mealPlannerUsecase;
 
     public MealPlannerView(MealPlannerUsecase mpUsecase) {
         mealPlannerUsecase = mpUsecase;
@@ -78,8 +72,6 @@ public class MealPlannerView {
             mealPanel.add(removeMealButton);
             mealsPanel.add(mealPanel);
         }
-
-        //System.out.println(mealPlannerUsecase.getMeals().get(0).getName());
 
         panel.add(mealsPanel);
         return panel;
