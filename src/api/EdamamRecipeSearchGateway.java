@@ -2,6 +2,7 @@ package api;
 
 import entity.Nutrients;
 import entity.Recipe;
+import entity.RecipeBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import usecase.search.RecipeSearchGateway;
@@ -184,66 +185,10 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
         for (int i = 0; i < hits.length(); i++) {
             JSONObject recipeJson = hits.getJSONObject(i).getJSONObject("recipe");
 
-            String name = recipeJson.optString("label");
-            String mainIngredient = "N/A";
-            List<String> ingredients = new ArrayList<>();
-            JSONArray ingredientLines = recipeJson.optJSONArray("ingredientLines");
-            if (ingredientLines != null) {
-                for (int j = 0; j < ingredientLines.length(); j++) {
-                    ingredients.add(ingredientLines.getString(j));
-                }
-                if (!ingredients.isEmpty()) mainIngredient = ingredients.get(0);
-            }
-
-            String instructions = "See full recipe online.";
-            int ingredientCount = ingredients.size();
-
-            List<String> dietLabels = new ArrayList<>();
-            JSONArray diets = recipeJson.optJSONArray("dietLabels");
-            if (diets != null) {
-                for (int j = 0; j < diets.length(); j++) {
-                    dietLabels.add(diets.getString(j));
-                }
-            }
-
-            JSONObject totalNutrients = recipeJson.optJSONObject("totalNutrients");
-            //System.out.println("Total Nutrients");
-
-            Nutrients nutrients = new Nutrients(
-                    (int) recipeJson.optDouble("calories", 0),
-                    totalNutrients.optJSONObject("PROCNT").optDouble("quantity", 0),
-                    totalNutrients.optJSONObject("FAT").optDouble("quantity", 0),
-                    totalNutrients.optJSONObject("SUGAR").optDouble("quantity", 0),
-                    totalNutrients.optJSONObject("NA").optDouble("quantity", 0),
-                    totalNutrients.optJSONObject("CHOCDF").optDouble("quantity", 0)
-            );
-
-            double prepTime = recipeJson.optDouble("totalTime", 0);
-            String cuisineType = recipeJson.optJSONArray("cuisineType") != null ?
-                    recipeJson.getJSONArray("cuisineType").optString(0) : "N/A";
-            String mealType = recipeJson.optJSONArray("mealType") != null ?
-                    recipeJson.getJSONArray("mealType").optString(0) : "N/A";
-            String dishType = recipeJson.optJSONArray("dishType") != null ?
-                    recipeJson.getJSONArray("dishType").optString(0) : "N/A";
-            String sourceUrl = recipeJson.optString("url", "");
-            String imageUrl = recipeJson.optString("image", "");
-
-            recipes.add(new Recipe(
-                    name,
-                    mainIngredient,
-                    ingredients,
-                    instructions,
-                    ingredientCount,
-                    dietLabels,
-                    nutrients,
-                    prepTime,
-                    cuisineType,
-                    mealType,
-                    dishType,
-                    sourceUrl,
-                    imageUrl,
-                    recipeJson.optString("uri")
-            ));
+            Recipe recipe = new RecipeBuilder()
+                    .fromEdamamJson(recipeJson)
+                    .build();
+            recipes.add(recipe);
         }
 
         return recipes;
