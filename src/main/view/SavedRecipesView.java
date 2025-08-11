@@ -77,6 +77,7 @@ public class SavedRecipesView extends RecipeView {
      */
     private List<Recipe> filterFavorites(List<Recipe> favorites, Map<String, String> filters) {
         if (filters.isEmpty()) {
+            System.out.println("No filteres");
             return new ArrayList<>(favorites);
         }
 
@@ -134,8 +135,8 @@ public class SavedRecipesView extends RecipeView {
 
             if (filters.containsKey("protein") && matchesFilters) {
                 try {
-                    double maxProtein = Double.parseDouble(filters.get("protein"));
-                    if (recipe.getNutriProtein() > maxProtein) {
+                    double minProtein = Double.parseDouble(filters.get("protein"));
+                    if (recipe.getNutriProtein() < minProtein) {
                         matchesFilters = false;
                     }
                 } catch (NumberFormatException e) {
@@ -180,7 +181,6 @@ public class SavedRecipesView extends RecipeView {
                 filteredResults.add(recipe);
             }
         }
-
         return filteredResults;
     }
 
