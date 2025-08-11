@@ -77,7 +77,7 @@ public class SingleRecipeView {
     private void createView() {
         JFrame frame = new JFrame();
         frame.setSize(500, 700);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
