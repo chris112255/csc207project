@@ -225,11 +225,13 @@ public class ExplorePageView extends RecipeView {
         });
         sortMenu.add(leastSugarItem);
 
-        String[] types = {
-                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks",
-                "Asian", "British", "Caribbean", "Central Europe", "Chinese", "Eastern Europe",
-                "French", "Greek", "Indian", "Italian", "Japanese", "Korean", "Kosher",
-                "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "South American", "South East Asian"
+
+        /*String[] types = {
+                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks", "American",
+                "Asian", "British", "Caribbean", "Central Europe", "Chinese",
+                "Eastern Europe", "French", "Greek", "Indian", "Italian",
+                "Japanese", "Korean", "Kosher", "Mediterranean", "Mexican",
+                "Middle Eastern", "Nordic", "South American", "South East Asian"
         };
 
         for (String type : types) {
@@ -244,8 +246,10 @@ public class ExplorePageView extends RecipeView {
                 updateResults(currentResults);
             });
             sortMenu.add(menuItem);
-        }
-
-        sortButton.addActionListener(e -> sortMenu.show(sortButton, 0, sortButton.getHeight()));
+        }*/
+      
+        sortButton.addActionListener(e -> {
+            sortMenu.show(sortButton, 0, sortButton.getHeight());
+        });
     }
 }

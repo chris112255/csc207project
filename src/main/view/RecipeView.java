@@ -105,7 +105,9 @@ public class RecipeView {
 
     private void createView() {
         frame = new JFrame("Recipe Manager");
+
         frame.setSize(1100, 750);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 

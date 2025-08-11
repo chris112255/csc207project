@@ -22,7 +22,6 @@ class MealPlannerUsecaseTest {
     void setUp() {
         mealPlanner = new MealPlannerUsecase();
 
-        // Create test recipes with different nutritional values
         Nutrients nutrients1 = new Nutrients(500, 30, 10, 5, 200, 40);
         Nutrients nutrients2 = new Nutrients(300, 20, 5, 2, 100, 30);
         Nutrients nutrients3 = new Nutrients(700, 40, 15, 10, 300, 50);
@@ -104,74 +103,69 @@ class MealPlannerUsecaseTest {
 
     @Test
     void testGetTotalCalories() {
-        mealPlanner.addToPlanner(recipe1); // 500 calories
-        mealPlanner.addToPlanner(recipe2); // 300 calories
+        mealPlanner.addToPlanner(recipe1);
+        mealPlanner.addToPlanner(recipe2);
         assertEquals(800, mealPlanner.getTotalCalories());
 
-        mealPlanner.addToPlanner(recipe3); // 700 calories
+        mealPlanner.addToPlanner(recipe3);
         assertEquals(1500, mealPlanner.getTotalCalories());
     }
 
     @Test
     void testGetTotalProtein() {
-        mealPlanner.addToPlanner(recipe1); // 30g protein
-        mealPlanner.addToPlanner(recipe2); // 20g protein
+        mealPlanner.addToPlanner(recipe1);
+        mealPlanner.addToPlanner(recipe2);
         assertEquals(50, mealPlanner.getTotalProtein());
 
-        mealPlanner.addToPlanner(recipe3); // 40g protein
+        mealPlanner.addToPlanner(recipe3);
         assertEquals(90, mealPlanner.getTotalProtein());
     }
 
     @Test
     void testGetTotalFat() {
-        mealPlanner.addToPlanner(recipe1); // 10g fat
-        mealPlanner.addToPlanner(recipe2); // 5g fat
+        mealPlanner.addToPlanner(recipe1);
+        mealPlanner.addToPlanner(recipe2);
         assertEquals(15, mealPlanner.getTotalFat());
 
-        mealPlanner.addToPlanner(recipe3); // 15g fat
+        mealPlanner.addToPlanner(recipe3);
         assertEquals(30, mealPlanner.getTotalFat());
     }
 
     @Test
     void testGetTotalCarbs() {
-        mealPlanner.addToPlanner(recipe1); // 40g carbs
-        mealPlanner.addToPlanner(recipe2); // 30g carbs
+        mealPlanner.addToPlanner(recipe1);
+        mealPlanner.addToPlanner(recipe2);
         assertEquals(70, mealPlanner.getTotalCarbs());
 
-        mealPlanner.addToPlanner(recipe3); // 50g carbs
+        mealPlanner.addToPlanner(recipe3);
         assertEquals(120, mealPlanner.getTotalCarbs());
     }
 
     @Test
     void testCalculateCalories() {
-        mealPlanner.addToPlanner(recipe1); // 500
-        mealPlanner.addToPlanner(recipe2); // 300
+        mealPlanner.addToPlanner(recipe1);
+        mealPlanner.addToPlanner(recipe2);
 
-        // Below range
         String result1 = mealPlanner.calculateCalories(900, 1200);
         assertTrue(result1.contains("under by 100"));
 
-        // Within range
         mealPlanner.removeFromPlanner(recipe2);
         String result2 = mealPlanner.calculateCalories(400, 600);
         assertTrue(result2.contains("falls in range"));
 
-        // Above range
-        mealPlanner.addToPlanner(recipe3); // 700
+        mealPlanner.addToPlanner(recipe3);
         String result3 = mealPlanner.calculateCalories(400, 1000);
         assertTrue(result3.contains("over by 200"));
     }
 
     @Test
     void testCalculateProtein() {
-        mealPlanner.addToPlanner(recipe1); // 30g
-        mealPlanner.addToPlanner(recipe2); // 20g
+        mealPlanner.addToPlanner(recipe1);
+        mealPlanner.addToPlanner(recipe2);
 
-        // Below minimum
         String result1 = mealPlanner.calculateProtein(60);
         assertTrue(result1.contains("under by 10"));
 
-        // Above minimum
         String result2 = mealPlanner.calculateProtein(40);
         assertTrue(result2.contains("falls in range"));
     }
@@ -181,25 +175,21 @@ class MealPlannerUsecaseTest {
         mealPlanner.addToPlanner(recipe1); // 10g
         mealPlanner.addToPlanner(recipe3); // 15g
 
-        // Below max
         String result1 = mealPlanner.calculateFat(30);
         assertTrue(result1.contains("falls in range"));
 
-        // Above max
         String result2 = mealPlanner.calculateFat(20);
         assertTrue(result2.contains("over by 5"));
     }
 
     @Test
     void testCalculateCarbs() {
-        mealPlanner.addToPlanner(recipe2); // 30g
-        mealPlanner.addToPlanner(recipe3); // 50g
+        mealPlanner.addToPlanner(recipe2);
+        mealPlanner.addToPlanner(recipe3);
 
-        // Below max
         String result1 = mealPlanner.calculateCarbs(90);
         assertTrue(result1.contains("falls in range"));
 
-        // Above max
         String result2 = mealPlanner.calculateCarbs(70);
         assertTrue(result2.contains("over by 10"));
     }
@@ -207,7 +197,7 @@ class MealPlannerUsecaseTest {
     @Test
     void testDuplicateRecipes() {
         mealPlanner.addToPlanner(recipe1);
-        mealPlanner.addToPlanner(recipe1); // Add same recipe again
+        mealPlanner.addToPlanner(recipe1);
 
         assertEquals(1, mealPlanner.getMeals().size()); // Should not allow duplicates
     }

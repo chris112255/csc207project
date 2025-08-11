@@ -20,7 +20,7 @@ public class HomePageView {
 
     private void createView() {
         JFrame frame = new JFrame("Recipe Manager");
-        frame.setSize(1000, 600);
+        frame.setSize(1100, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // create panel
