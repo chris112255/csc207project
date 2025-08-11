@@ -226,7 +226,7 @@ public class ExplorePageView extends RecipeView {
         });
         sortMenu.add(leastSugarItem);
 
-        String[] types = {
+        /*String[] types = {
                 "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks", "American",
                 "Asian", "British", "Caribbean", "Central Europe", "Chinese",
                 "Eastern Europe", "French", "Greek", "Indian", "Italian",
@@ -242,10 +242,10 @@ public class ExplorePageView extends RecipeView {
                 updateResults(freshCopy);
             });
             sortMenu.add(menuItem);
-        }
+        }*/
 
         sortButton.addActionListener(e -> {
-            sortMenu.show(sortButton, 0, sortButton.getHeight() + 200);
+            sortMenu.show(sortButton, 0, sortButton.getHeight());
         });
     }
 }

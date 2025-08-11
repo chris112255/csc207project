@@ -219,7 +219,6 @@ class RecipeSorterTest {
         RecipeSorterUseCase sorter = new RecipeSorterUseCase("typeMain Course");
         sorter.sortRecipes(recipes);
 
-        // Both recipe1 and recipe2 are Main Course, recipe3 is Dessert
         assertTrue(recipes.indexOf(recipe3) > recipes.indexOf(recipe1));
         assertTrue(recipes.indexOf(recipe3) > recipes.indexOf(recipe2));
 
@@ -232,9 +231,7 @@ class RecipeSorterTest {
 
     @Test
     void sortByFavorites() {
-        // Create test favorites
         List<Recipe> testFavorites = Arrays.asList(
-                // A pasta recipe that will match recipe1's characteristics
                 new Recipe(
                         "Favorite Pasta",
                         "Pasta",
@@ -254,16 +251,12 @@ class RecipeSorterTest {
                 recipe3  // Also favorite
         );
 
-        // Create test double
         FavouritesUsecase testFavouritesUsecase = new TestFavouritesUsecase(testFavorites);
 
         RecipeSorterUseCase sorter = new RecipeSorterUseCase("favs");
         sorter.favouritesUsecase = testFavouritesUsecase;
         sorter.sortRecipes(recipes);
 
-        // recipe3 should be first since it's in favorites and matches more categories
-        // recipe1 should be next because it shares Italian cuisine and pasta ingredients
-        // recipe2 should be last
         assertEquals(recipe2, recipes.get(0));
         assertEquals(recipe1, recipes.get(1));
         assertEquals(recipe3, recipes.get(2));
