@@ -22,15 +22,11 @@ public class RecipeView {
     protected JButton searchButton;
     protected JButton sortButton;
     protected JPanel resultsContainer;
-    protected JPanel resultsWrapper;
-    protected JPanel pageControlPanel;
-    protected JButton prevButton;
-    protected JButton nextButton;
     protected MealPlannerUsecase mealPlannerUseCase;
 
     public RecipeView(String title, MealPlannerUsecase mpUseCase) {
         this.title = title;
-        mealPlannerUseCase = mpUseCase;
+        this.mealPlannerUseCase = mpUseCase;
         this.createView();
     }
 
@@ -57,9 +53,9 @@ public class RecipeView {
     }
 
     private JPanel createFiltersPanel() {
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
 
-        primaryIngredient = new JTextField(8);
+        primaryIngredient = new JTextField(10);
         panel.add(createInputBox("Primary Ingredient", primaryIngredient));
 
         dietTypeDropdown = new JComboBox<>(new String[] {
@@ -67,36 +63,40 @@ public class RecipeView {
         });
         panel.add(createInputBox("Diet Type", dietTypeDropdown));
 
-        minCalories = new JTextField(5);
+        minCalories = new JTextField(6);
         panel.add(createInputBox("Min Calories", minCalories));
 
-        maxCalories = new JTextField(5);
+        maxCalories = new JTextField(6);
         panel.add(createInputBox("Max Calories", maxCalories));
 
-        protein = new JTextField(5);
-        panel.add(createInputBox("Min Protein", protein));
+        protein = new JTextField(6);
+        // CHANGED: label indicates minimum protein
+        panel.add(createInputBox("Protein (g min)", protein));
 
-        maxFat = new JTextField(5);
-        panel.add(createInputBox("Max Fats", maxFat));
+        maxFat = new JTextField(6);
+        panel.add(createInputBox("Max Fat (g)", maxFat));
 
-        maxSugar = new JTextField(5);
-        panel.add(createInputBox("Max Sugar", maxSugar));
+        maxSugar = new JTextField(6);
+        panel.add(createInputBox("Max Sugar (g)", maxSugar));
 
-        maxCarbs = new JTextField(5);
-        panel.add(createInputBox("Max Carbs", maxCarbs));
+        maxCarbs = new JTextField(6);
+        panel.add(createInputBox("Max Carbs (g)", maxCarbs));
 
         searchButton = new JButton("Search");
         panel.add(searchButton);
 
-        sortButton = new JButton("Sort By:");
+        sortButton = new JButton("Sort By");
         panel.add(sortButton);
 
         return panel;
     }
 
+    /** Results area WITH a scroll pane (no pagination buttons). */
     private JScrollPane createResultsPanel() {
         resultsContainer = new JPanel();
-        resultsContainer.setLayout(new GridLayout(0, 4, 10, 10));
+        // 4 columns, as many rows as needed
+        resultsContainer.setLayout(new GridLayout(0, 4, 12, 12));
+        resultsContainer.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         JScrollPane scrollPane = new JScrollPane(resultsContainer);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -106,7 +106,9 @@ public class RecipeView {
 
     private void createView() {
         frame = new JFrame("Recipe Manager");
-        frame.setSize(1100, 600);
+
+        frame.setSize(1100, 750);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 

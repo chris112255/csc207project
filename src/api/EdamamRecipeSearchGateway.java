@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
@@ -28,27 +27,19 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
         urlBuilder.append("&app_key=").append(APP_KEY);
         URL url = new URL(urlBuilder.toString());
 
-        // Open connection
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
+        conn.setRequestProperty("Accept", "application/json");
         conn.setRequestProperty("Edamam-Account-User", "utoronto");
 
-        // Check HTTP response
         if (conn.getResponseCode() == 200) {
-            // Read the JSON from the response
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder response = new StringBuilder();
             String line;
-
-            while ((line = in.readLine()) != null) {
-                response.append(line);
-            }
+            while ((line = in.readLine()) != null) response.append(line);
             in.close();
 
-            // Parse JSON
             JSONObject recipeJson = new JSONObject(response.toString());
-
-            // Example: Access the recipe label
             JSONObject recipeObj = recipeJson.getJSONObject("recipe");
 
             String name = recipeObj.optString("label");
@@ -75,7 +66,6 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
             }
 
             JSONObject totalNutrients = recipeObj.optJSONObject("totalNutrients");
-
             Nutrients nutrients = new Nutrients(
                     (int) recipeObj.optDouble("calories", 0),
                     totalNutrients.optJSONObject("PROCNT").optDouble("quantity", 0),
@@ -96,23 +86,11 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
             String imageUrl = recipeObj.optString("image", "");
 
             return new Recipe(
-                    name,
-                    mainIngredient,
-                    ingredients,
-                    instructions,
-                    ingredientCount,
-                    dietLabels,
-                    nutrients,
-                    prepTime,
-                    cuisineType,
-                    mealType,
-                    dishType,
-                    sourceUrl,
-                    imageUrl,
-                    recipeObj.optString("uri")
+                    name, mainIngredient, ingredients, instructions, ingredientCount,
+                    dietLabels, nutrients, prepTime, cuisineType, mealType, dishType,
+                    sourceUrl, imageUrl, recipeObj.optString("uri")
             );
-        }
-        else{
+        } else {
             System.out.println(conn.getResponseCode() + " " + conn.getResponseMessage());
         }
         return null;
@@ -143,17 +121,21 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
         for (Map.Entry<String, String> entry : params.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
+            if (value == null || value.isEmpty()) continue;
 
-            if (value != null && !value.isEmpty()) {
-                if (key.equals("q") || key.equals("diet") || key.equals("calories")) {
-                    urlBuilder.append("&").append(key).append("=")
-                            .append(URLEncoder.encode(value, "UTF-8"));
-                } else {
-                    String nutrientCode = getNutrientCode(key);
-                    if (nutrientCode != null) {
-                        urlBuilder.append("&nutrients%5B").append(nutrientCode)
-                                .append("%5D=0-").append(URLEncoder.encode(value, "UTF-8"));
-                    }
+            if (key.equals("q") || key.equals("diet") || key.equals("calories")) {
+                urlBuilder.append("&").append(key).append("=")
+                        .append(URLEncoder.encode(value, "UTF-8"));
+            } else if (key.equals("proteinMin")) {
+                // Minimum protein => "value+"
+                urlBuilder.append("&nutrients%5BPROCNT%5D=")
+                        .append(URLEncoder.encode(value + "+", "UTF-8"));
+            } else {
+                // Other nutrients treated as max => "0-max"
+                String nutrientCode = getNutrientCode(key);
+                if (nutrientCode != null) {
+                    urlBuilder.append("&nutrients%5B").append(nutrientCode)
+                            .append("%5D=0-").append(URLEncoder.encode(value, "UTF-8"));
                 }
             }
         }
@@ -165,15 +147,32 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
         System.out.println("Sending request to " + url);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
+        conn.setRequestProperty("Accept", "application/json");
+        // Some Edamam configurations require this header to be set consistently
+        conn.setRequestProperty("Edamam-Account-User", "utoronto");
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-                conn.getResponseCode() == 200 ? conn.getInputStream() : conn.getErrorStream()));
-        StringBuilder response = new StringBuilder();
+        int code = conn.getResponseCode();
+        String msg = conn.getResponseMessage();
+        System.out.println("HTTP " + code + " " + msg);
+
+        BufferedReader reader;
+        if (code == 200) {
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        } else {
+            reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+        }
+
+        StringBuilder body = new StringBuilder();
         String line;
-        while ((line = reader.readLine()) != null) response.append(line);
+        while ((line = reader.readLine()) != null) body.append(line);
         reader.close();
 
-        return response.toString();
+        if (code != 200) {
+            // Surface the server’s message so you can see what went wrong (e.g., 401/403/429)
+            throw new RuntimeException("Edamam request failed: HTTP " + code + " " + msg + " — " + body);
+        }
+
+        return body.toString();
     }
 
     public List<Recipe> parseRecipes(String jsonResponse) {
@@ -184,19 +183,15 @@ public class EdamamRecipeSearchGateway implements RecipeSearchGateway {
 
         for (int i = 0; i < hits.length(); i++) {
             JSONObject recipeJson = hits.getJSONObject(i).getJSONObject("recipe");
-
-            Recipe recipe = new RecipeBuilder()
-                    .fromEdamamJson(recipeJson)
-                    .build();
+            Recipe recipe = new RecipeBuilder().fromEdamamJson(recipeJson).build();
             recipes.add(recipe);
         }
-
         return recipes;
     }
 
     private String getNutrientCode(String filterName) {
         return switch (filterName) {
-            case "protein" -> "PROCNT";
+            case "protein" -> "PROCNT"; // kept for compatibility if ever used
             case "fat" -> "FAT";
             case "sugar" -> "SUGAR";
             case "carbohydrates" -> "CHOCDF";
