@@ -8,10 +8,8 @@ import usecase.sort.RecipeSorterUseCase;
 
 import javax.swing.*;
 import java.awt.*;
-
-import java.util.ArrayList;
-
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,32 +18,29 @@ public class ExplorePageView extends RecipeView {
 
     private final SearchRecipesUsecase searchRecipesUseCase = new SearchRecipesUsecase();
     private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
-    //private final MealPlannerUsecase mealPlannerUsecase = new MealPlannerUsecase();
 
-    private final int RECIPES_PER_PAGE = 8;
+    private List<Recipe> currentResults = new ArrayList<>();
 
     public ExplorePageView(MealPlannerUsecase mpUseCase) {
         super("Explore Page", mpUseCase);
 
+        // Search
         searchButton.addActionListener(e -> {
             Map<String, String> filters = getSearchFilters();
             List<Recipe> recipes = searchRecipesUseCase.execute(filters);
-            updateResults(recipes);
-            createResultSorter(recipes);
+            currentResults = new ArrayList<>(recipes);
+            updateResults(currentResults);
+            createResultSorter(currentResults);
         });
     }
 
     private Map<String, String> getSearchFilters() {
         Map<String, String> filters = new HashMap<>();
 
-        StringBuilder queryBuilder = new StringBuilder();
         String ingredient = primaryIngredient.getText().trim();
-
         if (!ingredient.isEmpty()) {
-            queryBuilder.append(ingredient);
+            filters.put("q", ingredient);
         }
-
-        if (queryBuilder.length() > 0) filters.put("q", queryBuilder.toString());
 
         String selectedDiet = (String) dietTypeDropdown.getSelectedItem();
         if (selectedDiet != null && !selectedDiet.isEmpty()) {
@@ -54,22 +49,14 @@ public class ExplorePageView extends RecipeView {
 
         String minCal = minCalories.getText().trim();
         String maxCal = maxCalories.getText().trim();
-
         if (!minCal.isEmpty() || !maxCal.isEmpty()) {
-            String calorieRange = (!minCal.isEmpty() && !maxCal.isEmpty()) ? minCal + "-" + maxCal
-                    : (!minCal.isEmpty()) ? minCal + "+"
-                    : "0-" + maxCal;
+            String calorieRange = (!minCal.isEmpty() && !maxCal.isEmpty()) ? (minCal + "-" + maxCal)
+                    : (!minCal.isEmpty()) ? (minCal + "+")
+                    : ("0-" + maxCal);
             filters.put("calories", calorieRange);
         }
 
-        //System.out.println("protein.getText().trim()+");
-
-        if(protein.getText().trim().isEmpty()){
-            addNutrientFilter(filters, "protein", protein.getText().trim());
-        }
-        else{
-            addNutrientFilter(filters, "protein", protein.getText() + "+".trim());
-        }
+        addNutrientFilter(filters, "protein", protein.getText().trim());
         addNutrientFilter(filters, "fat", maxFat.getText().trim());
         addNutrientFilter(filters, "sugar", maxSugar.getText().trim());
         addNutrientFilter(filters, "carbohydrates", maxCarbs.getText().trim());
@@ -83,65 +70,67 @@ public class ExplorePageView extends RecipeView {
         }
     }
 
+    /** Render all results into the scrollable grid with image thumbnails. */
     public void updateResults(List<Recipe> recipes) {
         resultsContainer.removeAll();
 
-        if (recipes.isEmpty()) {
+        if (recipes == null || recipes.isEmpty()) {
             resultsContainer.add(new JLabel("No recipes found. Try adjusting your search criteria."));
         } else {
             for (Recipe recipe : recipes) {
+                JPanel card = new JPanel();
+                card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+                card.setBorder(BorderFactory.createEtchedBorder());
+                card.setPreferredSize(new Dimension(240, 240));
 
-                JPanel recipePanel = new JPanel();
-                recipePanel.setLayout(new BoxLayout(recipePanel, BoxLayout.Y_AXIS));
-                recipePanel.setBorder(BorderFactory.createEtchedBorder());
-
-                JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
-                recipeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-                recipeButton.setPreferredSize(new Dimension(180, 60));
-                recipeButton.addActionListener(e -> new SingleRecipeView(recipe));
-
-                JButton favoriteButton = new JButton("Add to Favorites");
-                favoriteButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-                favoriteButton.setPreferredSize(new Dimension(180, 30));
-
-                if (favouritesUsecase.isFavourite(recipe)) {
-                    favoriteButton.setText("Remove from Favorites");
+                // Thumbnail
+                try {
+                    String imgUrl = recipe.getImageUrl();
+                    if (imgUrl != null && !imgUrl.isEmpty()) {
+                        ImageIcon icon = new ImageIcon(new URL(imgUrl));
+                        Image scaled = icon.getImage().getScaledInstance(200, 130, Image.SCALE_SMOOTH);
+                        JLabel imageLabel = new JLabel(new ImageIcon(scaled));
+                        imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                        card.add(Box.createVerticalStrut(6));
+                        card.add(imageLabel);
+                    } else {
+                        JLabel noImg = new JLabel("[No image]");
+                        noImg.setAlignmentX(Component.CENTER_ALIGNMENT);
+                        card.add(noImg);
+                    }
+                } catch (Exception ex) {
+                    JLabel noImg = new JLabel("[No image]");
+                    noImg.setAlignmentX(Component.CENTER_ALIGNMENT);
+                    card.add(noImg);
                 }
 
-                favoriteButton.addActionListener(e -> {
+                // Title button
+                JButton openBtn = new JButton("<html><center>" + recipe.getName() + "</center></html>");
+                openBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+                openBtn.addActionListener(e -> new SingleRecipeView(recipe));
+                card.add(Box.createVerticalStrut(6));
+                card.add(openBtn);
+
+                // Favourites toggle
+                JButton favBtn = new JButton(favouritesUsecase.isFavourite(recipe) ? "Remove from Favorites" : "Add to Favorites");
+                favBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+                favBtn.addActionListener(e -> {
                     if (favouritesUsecase.isFavourite(recipe)) {
                         favouritesUsecase.removeFromFavourites(recipe);
-                        favoriteButton.setText("Add to Favorites");
-                        JOptionPane.showMessageDialog(this.resultsContainer,
-                                "Removed from favorites: " + recipe.getName(),
+                        favBtn.setText("Add to Favorites");
+                        JOptionPane.showMessageDialog(resultsContainer, "Removed from favorites: " + recipe.getName(),
                                 "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     } else {
                         favouritesUsecase.addToFavourites(recipe);
-                        favoriteButton.setText("Remove from Favorites");
-                        JOptionPane.showMessageDialog(this.resultsContainer,
-                                "Added to favorites: " + recipe.getName(),
+                        favBtn.setText("Remove from Favorites");
+                        JOptionPane.showMessageDialog(resultsContainer, "Added to favorites: " + recipe.getName(),
                                 "Favorites", JOptionPane.INFORMATION_MESSAGE);
                     }
                 });
+                card.add(Box.createVerticalStrut(4));
+                card.add(favBtn);
 
-                JButton addToMealPlanButton = new JButton("Add to Meal Plan");
-                addToMealPlanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-                addToMealPlanButton.addActionListener(e -> {
-                    if(mealPlannerUseCase.isSelected(recipe)) {
-                        mealPlannerUseCase.removeFromPlanner(recipe);
-                        addToMealPlanButton.setText("Add to Meal Plan");
-                    }
-                    else {
-                        mealPlannerUseCase.addToPlanner(recipe);
-                        addToMealPlanButton.setText("Remove from Meal Plan");
-                    }
-                });
-
-                recipePanel.add(recipeButton);
-                recipePanel.add(favoriteButton);
-                recipePanel.add(addToMealPlanButton);
-                resultsContainer.add(recipePanel);
+                resultsContainer.add(card);
             }
         }
 
@@ -149,16 +138,18 @@ public class ExplorePageView extends RecipeView {
         resultsContainer.repaint();
     }
 
+    /** Sort menu; re-renders in the scroll grid. */
     private void createResultSorter(List<Recipe> recipes) {
         List<Recipe> results = new ArrayList<>(recipes);
-        List<Recipe> unsortedResults = new ArrayList<>();
-        unsortedResults.addAll(recipes);
+        List<Recipe> unsortedResults = new ArrayList<>(results);
+
         JPopupMenu sortMenu = new JPopupMenu();
         sortMenu.add(new JLabel("Sort By:"));
 
         JMenuItem defaultItem = new JMenuItem("Default");
         defaultItem.addActionListener(e -> {
-            updateResults(unsortedResults);
+            currentResults = new ArrayList<>(unsortedResults);
+            updateResults(currentResults);
         });
         sortMenu.add(defaultItem);
 
@@ -166,7 +157,8 @@ public class ExplorePageView extends RecipeView {
         favItem.addActionListener(e -> {
             RecipeSorterUseCase favSort = new RecipeSorterUseCase("favs");
             favSort.sortRecipes(results);
-            updateResults(results);
+            currentResults = new ArrayList<>(results);
+            updateResults(currentResults);
         });
         sortMenu.add(favItem);
 
@@ -174,7 +166,8 @@ public class ExplorePageView extends RecipeView {
         ingredientItem.addActionListener(e -> {
             RecipeSorterUseCase ingredientSort = new RecipeSorterUseCase("ingredients");
             ingredientSort.sortRecipes(results);
-            updateResults(results);
+            currentResults = new ArrayList<>(results);
+            updateResults(currentResults);
         });
         sortMenu.add(ingredientItem);
 
@@ -182,7 +175,8 @@ public class ExplorePageView extends RecipeView {
         timeItem.addActionListener(e -> {
             RecipeSorterUseCase timeSort = new RecipeSorterUseCase("time");
             timeSort.sortRecipes(results);
-            updateResults(results);
+            currentResults = new ArrayList<>(results);
+            updateResults(currentResults);
         });
         sortMenu.add(timeItem);
 
@@ -190,7 +184,8 @@ public class ExplorePageView extends RecipeView {
         leastCalItem.addActionListener(e -> {
             RecipeSorterUseCase leastCalSort = new RecipeSorterUseCase("caloriesAscending");
             leastCalSort.sortRecipes(results);
-            updateResults(results);
+            currentResults = new ArrayList<>(results);
+            updateResults(currentResults);
         });
         sortMenu.add(leastCalItem);
 
@@ -198,7 +193,8 @@ public class ExplorePageView extends RecipeView {
         mostCalItem.addActionListener(e -> {
             RecipeSorterUseCase mostCalSort = new RecipeSorterUseCase("caloriesDescending");
             mostCalSort.sortRecipes(results);
-            updateResults(results);
+            currentResults = new ArrayList<>(results);
+            updateResults(currentResults);
         });
         sortMenu.add(mostCalItem);
 
@@ -206,7 +202,8 @@ public class ExplorePageView extends RecipeView {
         mostProtItem.addActionListener(e -> {
             RecipeSorterUseCase mostProtSort = new RecipeSorterUseCase("proteinDescending");
             mostProtSort.sortRecipes(results);
-            updateResults(results);
+            currentResults = new ArrayList<>(results);
+            updateResults(currentResults);
         });
         sortMenu.add(mostProtItem);
 
@@ -214,7 +211,8 @@ public class ExplorePageView extends RecipeView {
         leastFatItem.addActionListener(e -> {
             RecipeSorterUseCase leastFatSort = new RecipeSorterUseCase("fatAscending");
             leastFatSort.sortRecipes(results);
-            updateResults(results);
+            currentResults = new ArrayList<>(results);
+            updateResults(currentResults);
         });
         sortMenu.add(leastFatItem);
 
@@ -222,30 +220,32 @@ public class ExplorePageView extends RecipeView {
         leastSugarItem.addActionListener(e -> {
             RecipeSorterUseCase leastSugarSort = new RecipeSorterUseCase("sugarAscending");
             leastSugarSort.sortRecipes(results);
-            updateResults(results);
+            currentResults = new ArrayList<>(results);
+            updateResults(currentResults);
         });
         sortMenu.add(leastSugarItem);
 
         String[] types = {
-                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks", "American",
-                "Asian", "British", "Caribbean", "Central Europe", "Chinese",
-                "Eastern Europe", "French", "Greek", "Indian", "Italian",
-                "Japanese", "Korean", "Kosher", "Mediterranean", "Mexican",
-                "Middle Eastern", "Nordic", "South American", "South East Asian"
+                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks",
+                "Asian", "British", "Caribbean", "Central Europe", "Chinese", "Eastern Europe",
+                "French", "Greek", "Indian", "Italian", "Japanese", "Korean", "Kosher",
+                "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "South American", "South East Asian"
         };
 
         for (String type : types) {
-            JMenuItem menuItem = new JMenuItem(type + " First");
+            String menuItemLabel = type + " First";
+            String sorterType = "type" + type;
+
+            JMenuItem menuItem = new JMenuItem(menuItemLabel);
             menuItem.addActionListener(e -> {
-                List<Recipe> freshCopy = new ArrayList<>(recipes);
-                new RecipeSorterUseCase("type" + type).sortRecipes(freshCopy);
-                updateResults(freshCopy);
+                RecipeSorterUseCase sorter = new RecipeSorterUseCase(sorterType);
+                sorter.sortRecipes(results);
+                currentResults = new ArrayList<>(results);
+                updateResults(currentResults);
             });
             sortMenu.add(menuItem);
         }
 
-        sortButton.addActionListener(e -> {
-            sortMenu.show(sortButton, 0, sortButton.getHeight() + 200);
-        });
+        sortButton.addActionListener(e -> sortMenu.show(sortButton, 0, sortButton.getHeight()));
     }
 }
