@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.AbstractMap;
 import java.util.List;
 
 public class SingleRecipeView {
@@ -39,8 +40,8 @@ public class SingleRecipeView {
     private JPanel createRecipeInfo() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        JLabel cookTime = new JLabel("Cook Time: " + recipe.getPrepTime());
-        JLabel ingredients = new JLabel("Ingredients: " + recipe.getIngredients());
+        JLabel cookTime = new JLabel("Cook Time (minutes): " + recipe.getPrepTime());
+        JLabel ingredients = new JLabel("<html> Ingredients: " + recipe.getIngredients() + "</html>");
         panel.add(cookTime);
         panel.add(ingredients);
         return panel;
@@ -56,15 +57,18 @@ public class SingleRecipeView {
         JLabel caloriesLabel = new JLabel("Calories: " + recipe.getNutriCalories());
         panel.add(caloriesLabel);
 
-        JLabel macrosLabel = new JLabel("Protein: " + recipe.getNutriProtein() +
-                "Carbohydrates: " + recipe.getNutriSugar() + "Fat: " +
-                recipe.getNutriFat());
+        JLabel macrosLabel = new JLabel("<html>Protein (g): " + recipe.getNutriProtein() +
+                "<br>Carbohydrates (g): " + recipe.getNutriCarbs() + "<br>Fat (g): " +
+                recipe.getNutriFat() + "</html>");
         panel.add(macrosLabel);
 
-        JLabel sodiumLabel = new JLabel("Sodium: " + recipe.getNutriSodium());
+        JLabel sodiumLabel = new JLabel("Sodium (mg): " + recipe.getNutriSodium());
         panel.add(sodiumLabel);
 
-        JLabel warningsLabel = new JLabel("Nutritional Warnings: ");
+        JLabel sugarLabel = new JLabel("Sugar (g): " + recipe.getNutriSugar());
+        panel.add(sugarLabel);
+
+        JLabel warningsLabel = new JLabel("Nutritional Warnings: " + recipe.getWarnings());
         panel.add(warningsLabel);
 
         return panel;
@@ -72,8 +76,8 @@ public class SingleRecipeView {
 
     private void createView() {
         JFrame frame = new JFrame();
-        frame.setSize(500, 600);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(500, 700);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -155,6 +159,12 @@ public class SingleRecipeView {
         panel.add(nutritionalInfoPanel);
 
         panel.add(Box.createVerticalGlue());
+
+        controlBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        namePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        imagePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        recipeInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        nutritionalInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         frame.add(panel);
         frame.setLocationRelativeTo(null);

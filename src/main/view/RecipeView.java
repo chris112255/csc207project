@@ -1,5 +1,7 @@
 package main.view;
 
+import usecase.MealPlannerUsecase;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -18,14 +20,17 @@ public class RecipeView {
     protected JTextField maxCarbs;
 
     protected JButton searchButton;
+    protected JButton sortButton;
     protected JPanel resultsContainer;
     protected JPanel resultsWrapper;
     protected JPanel pageControlPanel;
     protected JButton prevButton;
     protected JButton nextButton;
+    protected MealPlannerUsecase mealPlannerUseCase;
 
-    public RecipeView(String title) {
+    public RecipeView(String title, MealPlannerUsecase mpUseCase) {
         this.title = title;
+        mealPlannerUseCase = mpUseCase;
         this.createView();
     }
 
@@ -43,7 +48,7 @@ public class RecipeView {
         JButton homeButton = new JButton("Home");
         homeButton.addActionListener(e -> {
             frame.dispose();
-            new HomePageView();
+            new HomePageView(mealPlannerUseCase);
         });
         JLabel label = new JLabel(this.title);
         panel.add(homeButton);
@@ -69,7 +74,7 @@ public class RecipeView {
         panel.add(createInputBox("Max Calories", maxCalories));
 
         protein = new JTextField(5);
-        panel.add(createInputBox("Protein", protein));
+        panel.add(createInputBox("Min Protein", protein));
 
         maxFat = new JTextField(5);
         panel.add(createInputBox("Max Fats", maxFat));
@@ -83,32 +88,25 @@ public class RecipeView {
         searchButton = new JButton("Search");
         panel.add(searchButton);
 
+        sortButton = new JButton("Sort By:");
+        panel.add(sortButton);
+
         return panel;
     }
 
-    private JPanel createResultsPanel() {
+    private JScrollPane createResultsPanel() {
         resultsContainer = new JPanel();
-        resultsContainer.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 20));
+        resultsContainer.setLayout(new GridLayout(0, 4, 10, 10));
 
-        resultsWrapper = new JPanel(new BorderLayout());
-        resultsWrapper.add(resultsContainer, BorderLayout.CENTER);
-        return resultsWrapper;
-    }
-
-    protected JPanel createPageControlPanel() {
-        pageControlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        prevButton = new JButton("prev");
-        nextButton = new JButton("next");
-
-        pageControlPanel.add(prevButton);
-        pageControlPanel.add(nextButton);
-
-        return pageControlPanel;
+        JScrollPane scrollPane = new JScrollPane(resultsContainer);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        return scrollPane;
     }
 
     private void createView() {
         frame = new JFrame("Recipe Manager");
-        frame.setSize(1200, 800);
+        frame.setSize(1000, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
@@ -119,7 +117,6 @@ public class RecipeView {
 
         frame.add(topPanel, BorderLayout.NORTH);
         frame.add(createResultsPanel(), BorderLayout.CENTER);
-        frame.add(createPageControlPanel(), BorderLayout.SOUTH);
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

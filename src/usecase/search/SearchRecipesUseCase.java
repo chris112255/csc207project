@@ -14,6 +14,7 @@ public class SearchRecipesUseCase {
     }
 
     public List<Recipe> execute(Map<String, String> filters) {
+        System.out.println("Searching recipes using filters: " + filters);
         try {
             return gateway.searchRecipes(filters);
         } catch (Exception e) {

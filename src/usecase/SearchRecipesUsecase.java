@@ -1,12 +1,16 @@
 package usecase;
 
+import api.EdamamRecipeSearchGateway;
+import entity.Nutrients;
 import entity.Recipe;
+import entity.RecipeBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -76,8 +80,18 @@ public class SearchRecipesUsecase {
                         String nutrientCode = getNutrientCode(key);
                         if (nutrientCode != null) {
                             // Format as range: 0-maxValue
-                            urlBuilder.append("&nutrients%5B").append(nutrientCode)
-                                    .append("%5D=0-").append(URLEncoder.encode(value, "UTF-8"));
+                            //System.out.println(urlBuilder.append("&nutrients%5B").append(nutrientCode)
+                             //       .append("%5D=").append(URLEncoder.encode(value, "UTF-8")).append("+"));
+//                            if(key.equals("protein")) {
+//                                String minValuePlus = value + "+";
+//                                System.out.println(minValuePlus);
+//                                urlBuilder.append("&nutrients%5B").append(nutrientCode)
+//                                        .append("%5D=").append(URLEncoder.encode(minValuePlus, "UTF-8"));
+//                            }
+//                            else {
+                                urlBuilder.append("&nutrients%5B").append(nutrientCode)
+                                        .append("%5D=").append(URLEncoder.encode(value, "UTF-8"));
+                            //}
                         }
                     }
                 }
@@ -146,17 +160,15 @@ public class SearchRecipesUsecase {
             }
 
             JSONArray hits = json.getJSONArray("hits");
+
             System.out.println("Processing " + hits.length() + " hits"); // Debug output
 
             for (int i = 0; i < hits.length(); i++) {
-                JSONObject hit = hits.getJSONObject(i);
-                JSONObject recipeJson = hit.getJSONObject("recipe");
-
-                String title = recipeJson.getString("label");
-                String imageUrl = recipeJson.optString("image", "");
-                String sourceUrl = recipeJson.optString("url", "");
-
-                recipes.add(new Recipe(title, imageUrl, sourceUrl));
+                JSONObject recipeJson = hits.getJSONObject(i).getJSONObject("recipe");
+                Recipe recipe = new RecipeBuilder()
+                        .fromEdamamJson(recipeJson)
+                        .build();
+                recipes.add(recipe);
             }
         } catch (Exception e) {
             System.err.println("Error parsing JSON: " + e.getMessage());
@@ -165,4 +177,5 @@ public class SearchRecipesUsecase {
 
         return recipes;
     }
+
 }
