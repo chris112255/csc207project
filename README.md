@@ -2,9 +2,13 @@
 User Stories: 
 
 The user wants a page where they can easily go to their saved recipes or a page where they can add recipes to their saved recipes. [Team Story]
+
 Use Case: By running the program, a jframe is opened where there are three buttons: "Favourites", "Search Recipes" and "Meal Planner".
+
 Use Case: The "Favourites" button opens a new jframe that displays the users saved recipes. These will be stored locally on the users computer.
+
 Use Case: The "Search Recipes" button opens a new jframe that allows the user to search for recipes based on their needs. For example they can search the main ingredient, or search recipes based on their macro requirements.
+
 Use Case: The "Meal Planner" button opens a new jframe that allows the user to set macro goals and see how if their planned meals reach the goals or not and by how much. 
 
 The user has saved some of their favorite recipes in the past but is now on a diet. They will be able to filter their recipes according to their macro requirements, allergies, type of diet, the number of ingredients, and the main ingredient in the recipe. The user should also be able to delete recipes from their favorites. [Team Story] 
