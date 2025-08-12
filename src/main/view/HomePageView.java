@@ -1,62 +1,81 @@
 package main.view;
+
 import javax.swing.*;
-import api.EdamamRecipeSearchGateway;
-import usecase.MealPlannerUsecase;
-import usecase.search.SearchRecipesUseCase;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
+public class HomePageView extends JPanel {
+    private final JLabel ascii = new JLabel("", SwingConstants.CENTER);
+    private Timer timer;
 
-public class HomePageView {
-    private MealPlannerUsecase mealPlannerUsecase;
+    public HomePageView(Runnable goExplore, Runnable goSaved, Runnable goPlanner) {
+        setLayout(new BorderLayout());
 
-    public HomePageView() {
-        mealPlannerUsecase = new MealPlannerUsecase();
-        createView();
+        JLabel title = new JLabel("Recipe Manager", SwingConstants.CENTER);
+        title.setBorder(BorderFactory.createEmptyBorder(12, 0, 4, 0));
+        add(title, BorderLayout.NORTH);
+
+        // center the ASCII perfectly
+        JPanel center = new JPanel(new GridBagLayout());
+        ascii.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 22));
+        ascii.setHorizontalAlignment(SwingConstants.CENTER);
+        center.add(ascii, new GridBagConstraints());
+        add(center, BorderLayout.CENTER);
+
+        startAsciiAnimation();
     }
 
-    public HomePageView(MealPlannerUsecase mealPlannerUsecase) {
-        this.mealPlannerUsecase = mealPlannerUsecase;
-        createView();
+    private void startAsciiAnimation() {
+        List<String> frames = buildFrames();
+        if (timer != null) timer.stop();
+        final int[] i = {0};
+        timer = new Timer(220, e -> {
+            ascii.setText(frames.get(i[0]));  // <-- fixed extra bracket
+            i[0] = (i[0] + 1) % frames.size();
+        });
+        timer.start();
     }
 
-    private void createView() {
-        JFrame frame = new JFrame("Recipe Manager");
-        frame.setSize(1100, 600);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private List<String> buildFrames() {
+        ArrayList<String> frames = new ArrayList<>();
 
-        // create panel
-        JPanel buttons = new JPanel();
+        // steam wobble
+        String steamA =
+                "                 (  )                   \n" +
+                        "               (      )                 \n" +
+                        "                 (  )        ~          \n";
+        String steamB =
+                "                   (  )                 \n" +
+                        "                 (      )   ~           \n" +
+                        "                   (  )                 \n";
+        String steamC =
+                "                 ( ) ( )                \n" +
+                        "                   (  )       ~         \n";
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        // pot with handles, blank body
+        String pot =
+                        "              _____________              \n" +
+                        "        _____/             \\____        \n" +
+                        "       |                         |       \n" +
+                        "       |                         |       \n" +
+                        "       |_________________________|       \n" +
+                        "         \\___________________/          \n" +
+                        "                 sizzle...               ";
 
-        JLabel label = new JLabel("Recipe Manager");
-        panel.add(label);
+        frames.add(pre(steamA + pot));
+        frames.add(pre(steamB + pot));
+        frames.add(pre(steamC + pot));
+        frames.add(pre(steamB + pot));
 
-        JButton search = new JButton("Search Recipes");
-        search.addActionListener(e -> {
-            frame.dispose(); // Close current window
-            new ExplorePageView(mealPlannerUsecase); // Open explore page
-        });
-        buttons.add(search);
+        return frames;
+    }
 
-        JButton favourites = new JButton("Favourites");
-        favourites.addActionListener(e -> {
-            frame.dispose(); // Close current window
-            new SavedRecipesView(mealPlannerUsecase); // Open saved recipes page
-        });
-        buttons.add(favourites);
-
-        JButton planner = new JButton("Meal Planner");
-        planner.addActionListener(e -> {
-            frame.dispose(); // Close current window
-            new MealPlannerView(mealPlannerUsecase); // Open meal planenr page
-        });
-        buttons.add(planner);
-
-        panel.add(buttons);
-        frame.add(panel);
-
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+    private String pre(String body) {
+        return "<html><div style='text-align:center'>"
+                + "<pre style='display:inline-block; text-align:left; "
+                + "font-family:monospace; font-size:22px; line-height:1.05; margin:0'>"
+                + body
+                + "</pre></div></html>";
     }
 }

@@ -5,12 +5,16 @@ import entity.Recipe;
 import usecase.MealPlannerUsecase;
 import usecase.sort.RecipeSorterUseCase;
 
-
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.awt.event.ActionListener;
 
 public class SavedRecipesView extends RecipeView {
     private final FavouritesUsecase favoritesUsecase = new FavouritesUsecase();
@@ -18,234 +22,124 @@ public class SavedRecipesView extends RecipeView {
 
     public SavedRecipesView(MealPlannerUsecase mpUseCase) {
         super("Saved Recipes", mpUseCase);
+
+        // Make the results area span the full window as a vertical list of rows
+        resultsContainer.setLayout(new BoxLayout(resultsContainer, BoxLayout.Y_AXIS));
+
         loadFavorites();
+
         searchButton.addActionListener(e -> {
             Map<String, String> filters = getFilterCriteria();
             List<Recipe> filteredFavorites = filterFavorites(originalFavorites, filters);
             displayFavorites(filteredFavorites);
         });
+
         createFavSorter();
     }
-    /**
-     * Get filter options from GUI
-     */
+
     private Map<String, String> getFilterCriteria() {
         Map<String, String> filters = new HashMap<>();
-
-        StringBuilder queryBuilder = new StringBuilder();
         String ingredient = primaryIngredient.getText().trim();
-
-        if (!ingredient.isEmpty()) {
-            queryBuilder.append(ingredient);
-        }
-
-        if (queryBuilder.length() > 0) filters.put("q", queryBuilder.toString());
+        if (!ingredient.isEmpty()) filters.put("q", ingredient);
 
         String selectedDiet = (String) dietTypeDropdown.getSelectedItem();
-        if (selectedDiet != null && !selectedDiet.isEmpty()) {
-            filters.put("diet", selectedDiet);
-        }
+        if (selectedDiet != null && !selectedDiet.isEmpty()) filters.put("diet", selectedDiet);
 
         String minCal = minCalories.getText().trim();
         String maxCal = maxCalories.getText().trim();
         if (!minCal.isEmpty() || !maxCal.isEmpty()) {
-            String calorieRange = (!minCal.isEmpty() && !maxCal.isEmpty()) ? minCal + "-" + maxCal
-                    : (!minCal.isEmpty()) ? minCal + "+"
-                    : "0-" + maxCal;
+            String calorieRange = (!minCal.isEmpty() && !maxCal.isEmpty()) ? (minCal + "-" + maxCal)
+                    : (!minCal.isEmpty()) ? (minCal + "+")
+                    : ("0-" + maxCal);
             filters.put("calories", calorieRange);
         }
 
         addNutrientFilter(filters, "protein", protein.getText().trim());
-        addNutrientFilter(filters, "fat", maxFat.getText().trim());
-        addNutrientFilter(filters, "sugar", maxSugar.getText().trim());
+        addNutrientFilter(filters, "fat",     maxFat.getText().trim());
+        addNutrientFilter(filters, "sugar",   maxSugar.getText().trim());
         addNutrientFilter(filters, "carbohydrates", maxCarbs.getText().trim());
-
         return filters;
     }
-
-    /**
-     * Helper method to add nutrient filters
-     */
     private void addNutrientFilter(Map<String, String> filters, String nutrient, String value) {
-        if (!value.isEmpty()) {
-            filters.put(nutrient, value);
-        }
+        if (!value.isEmpty()) filters.put(nutrient, value);
     }
 
-    /**
-     * Filter favorites based on criteria
-     */
     private List<Recipe> filterFavorites(List<Recipe> favorites, Map<String, String> filters) {
-        if (filters.isEmpty()) {
-            System.out.println("No filteres");
-            return new ArrayList<>(favorites);
-        }
+        if (filters.isEmpty()) return new ArrayList<>(favorites);
 
-        List<Recipe> filteredResults = new ArrayList<>();
-
-        for (Recipe recipe : favorites) {
-            boolean matchesFilters = true;
+        List<Recipe> out = new ArrayList<>();
+        for (Recipe r : favorites) {
+            boolean ok = true;
 
             if (filters.containsKey("q")) {
-                String query = filters.get("q").toLowerCase();
-                boolean matchesQuery = recipe.getName().toLowerCase().contains(query) ||
-                        recipe.getMainIngredient().toLowerCase().contains(query) ||
-                        recipe.getIngredients().stream().anyMatch(ingredient ->
-                                ingredient.toLowerCase().contains(query));
-                if (!matchesQuery) {
-                    matchesFilters = false;
-                }
+                String q = filters.get("q").toLowerCase();
+                boolean hit = r.getName().toLowerCase().contains(q)
+                        || r.getMainIngredient().toLowerCase().contains(q)
+                        || r.getIngredients().stream().anyMatch(s -> s.toLowerCase().contains(q));
+                if (!hit) ok = false;
             }
 
-            if (filters.containsKey("diet") && matchesFilters) {
-                String dietFilter = filters.get("diet").toLowerCase();
-                boolean matchesDiet = recipe.getDietType().stream().anyMatch(diet ->
-                        diet.toLowerCase().contains(dietFilter));
-                if (!matchesDiet) {
-                    matchesFilters = false;
-                }
+            if (ok && filters.containsKey("diet")) {
+                String want = filters.get("diet").toLowerCase();
+                boolean hit = r.getDietType().stream().anyMatch(d -> d.toLowerCase().contains(want));
+                if (!hit) ok = false;
             }
 
-            if (filters.containsKey("calories") && matchesFilters) {
-                String calorieRange = filters.get("calories");
-                int recipeCalories = recipe.getNutriCalories();
-
-                if (calorieRange.contains("-")) {
-                    String[] parts = calorieRange.split("-");
+            if (ok && filters.containsKey("calories")) {
+                String range = filters.get("calories");
+                int cals = r.getNutriCalories();
+                if (range.contains("-")) {
+                    String[] p = range.split("-");
                     try {
-                        int minCal = Integer.parseInt(parts[0]);
-                        int maxCal = Integer.parseInt(parts[1]);
-                        if (recipeCalories < minCal || recipeCalories > maxCal) {
-                            matchesFilters = false;
-                        }
-                    } catch (NumberFormatException e) {
-                        // Skip invalid calorie range
-                    }
-                } else if (calorieRange.endsWith("+")) {
+                        int lo = Integer.parseInt(p[0]);
+                        int hi = Integer.parseInt(p[1]);
+                        if (cals < lo || cals > hi) ok = false;
+                    } catch (NumberFormatException ignored) {}
+                } else if (range.endsWith("+")) {
                     try {
-                        int minCal = Integer.parseInt(calorieRange.replace("+", ""));
-                        if (recipeCalories < minCal) {
-                            matchesFilters = false;
-                        }
-                    } catch (NumberFormatException e) {
-                        // Skip invalid calorie range
-                    }
+                        int lo = Integer.parseInt(range.replace("+", ""));
+                        if (cals < lo) ok = false;
+                    } catch (NumberFormatException ignored) {}
                 }
             }
 
-            if (filters.containsKey("protein") && matchesFilters) {
-                try {
-                    double minProtein = Double.parseDouble(filters.get("protein"));
-                    if (recipe.getNutriProtein() < minProtein) {
-                        matchesFilters = false;
-                    }
-                } catch (NumberFormatException e) {
-                    // Skip invalid protein value
-                }
+            if (ok && filters.containsKey("protein")) {
+                try { if (r.getNutriProtein() < Double.parseDouble(filters.get("protein"))) ok = false; }
+                catch (NumberFormatException ignored) {}
+            }
+            if (ok && filters.containsKey("fat")) {
+                try { if (r.getNutriFat() > Double.parseDouble(filters.get("fat"))) ok = false; }
+                catch (NumberFormatException ignored) {}
+            }
+            if (ok && filters.containsKey("sugar")) {
+                try { if (r.getNutriSugar() > Double.parseDouble(filters.get("sugar"))) ok = false; }
+                catch (NumberFormatException ignored) {}
+            }
+            if (ok && filters.containsKey("carbohydrates")) {
+                try { if (r.getNutriCarbs() > Double.parseDouble(filters.get("carbohydrates"))) ok = false; }
+                catch (NumberFormatException ignored) {}
             }
 
-            if (filters.containsKey("fat") && matchesFilters) {
-                try {
-                    double maxFat = Double.parseDouble(filters.get("fat"));
-                    if (recipe.getNutriFat() > maxFat) {
-                        matchesFilters = false;
-                    }
-                } catch (NumberFormatException e) {
-                    // Skip invalid fat value
-                }
-            }
-
-            if (filters.containsKey("sugar") && matchesFilters) {
-                try {
-                    double maxSugar = Double.parseDouble(filters.get("sugar"));
-                    if (recipe.getNutriSugar() > maxSugar) {
-                        matchesFilters = false;
-                    }
-                } catch (NumberFormatException e) {
-                    // Skip invalid sugar value
-                }
-            }
-
-            if (filters.containsKey("carbohydrates") && matchesFilters) {
-                try {
-                    double maxCarbs = Double.parseDouble(filters.get("carbohydrates"));
-                    if (recipe.getNutriCarbs() > maxCarbs) {
-                        matchesFilters = false;
-                    }
-                } catch (NumberFormatException e) {
-                    // Skip invalid carbs value
-                }
-            }
-
-            if (matchesFilters) {
-                filteredResults.add(recipe);
-            }
+            if (ok) out.add(r);
         }
-        return filteredResults;
+        return out;
     }
 
-    /**
-    Load and display all favorite recipes
-     */
     private void loadFavorites() {
         List<Recipe> favorites = favoritesUsecase.getFavourites();
         originalFavorites = new ArrayList<>(favorites);
         displayFavorites(favorites);
     }
 
-    /**
-     Display favorite recipes in the results container
-     */
     private void displayFavorites(List<Recipe> favorites) {
         resultsContainer.removeAll();
 
         if (favorites.isEmpty()) {
-            JLabel noFavoritesLabel = new JLabel("No favorite recipes saved yet.");
-            resultsContainer.add(noFavoritesLabel);
+            resultsContainer.add(new JLabel("No favorite recipes saved yet."));
         } else {
             for (Recipe recipe : favorites) {
-                JPanel recipePanel = new JPanel();
-                recipePanel.setLayout(new BoxLayout(recipePanel, BoxLayout.Y_AXIS));
-                recipePanel.setBorder(BorderFactory.createEtchedBorder());
-
-                // Recipe title button
-                JButton recipeButton = new JButton("<html><center>" + recipe.getName() + "</center></html>");
-                recipeButton.setPreferredSize(new java.awt.Dimension(180, 60));
-                recipeButton.addActionListener(e -> {
-                    new SingleRecipeView(recipe);
-                });
-
-                JButton removeButton = new JButton("Remove from Favorites");
-                removeButton.setPreferredSize(new java.awt.Dimension(180, 30));
-                removeButton.addActionListener(e -> {
-                    favoritesUsecase.removeFromFavourites(recipe);
-                    JOptionPane.showMessageDialog(this.resultsContainer,
-                            "Removed from favorites: " + recipe.getName(),
-                            "Favorites", JOptionPane.INFORMATION_MESSAGE);
-                    // Refresh the display
-                    loadFavorites();
-                });
-
-                recipePanel.add(recipeButton);
-                recipePanel.add(removeButton);
-
-                JButton addToPlanner = new JButton("Add to Planner");
-                if (mealPlannerUseCase.isSelected(recipe)) {
-                    addToPlanner.setText("Remove from Planner");
-                }
-
-                addToPlanner.addActionListener(e -> {
-                    if (mealPlannerUseCase.isSelected(recipe)) {
-                        mealPlannerUseCase.removeFromPlanner(recipe);
-                        addToPlanner.setText("Add to Planner");
-                    } else {
-                        mealPlannerUseCase.addToPlanner(recipe);
-                        addToPlanner.setText("Remove from Planner");
-                    }
-                });
-                recipePanel.add(addToPlanner);
-
-                resultsContainer.add(recipePanel);
+                resultsContainer.add(buildRow(recipe));
+                resultsContainer.add(Box.createVerticalStrut(8));
             }
         }
 
@@ -253,98 +147,152 @@ public class SavedRecipesView extends RecipeView {
         resultsContainer.repaint();
     }
 
+    private JPanel buildRow(Recipe recipe) {
+        JPanel row = new JPanel(new BorderLayout(12, 8));
+        row.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(210,210,210)),
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)
+        ));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 160));
+
+        JLabel thumb = new JLabel("[Loading image]", SwingConstants.CENTER);
+        thumb.setPreferredSize(new Dimension(200, 130));
+        thumb.setBorder(BorderFactory.createLineBorder(new Color(230,230,230)));
+        row.add(thumb, BorderLayout.WEST);
+
+        String imgUrl = recipe.getImageUrl();
+        if (imgUrl != null && !imgUrl.isEmpty()) {
+            loadImageAsync(imgUrl, thumb, 200, 130);
+        } else {
+            thumb.setText("[No image]");
+        }
+
+        JPanel center = new JPanel();
+        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+
+        JButton titleBtn = new JButton("<html><b>" + recipe.getName() + "</b></html>");
+        titleBtn.setHorizontalAlignment(SwingConstants.LEFT);
+        titleBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleBtn.addActionListener(e -> new SingleRecipeView(recipe, mealPlannerUseCase));
+
+        JLabel meta = new JLabel(
+                String.format("<html>%s | %s | %s<br/>Calories: %d | Protein: %.0fg | Carbs: %.0fg | Fat: %.0fg</html>",
+                        recipe.getCuisineType(), recipe.getMealType(), recipe.getDishType(),
+                        recipe.getNutriCalories(), recipe.getNutriProtein(), recipe.getNutriCarbs(), recipe.getNutriFat())
+        );
+        meta.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        actions.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JButton removeBtn = new JButton("Remove from Saved");
+        removeBtn.addActionListener(e -> {
+            favoritesUsecase.removeFromFavourites(recipe);
+            JOptionPane.showMessageDialog(resultsContainer,
+                    "Removed from Saved: " + recipe.getName(),
+                    "Saved", JOptionPane.INFORMATION_MESSAGE);
+            loadFavorites();
+        });
+
+        JButton plannerBtn = new JButton(mealPlannerUseCase.isSelected(recipe) ? "Remove from Planner" : "Add to Planner");
+        plannerBtn.addActionListener(e -> {
+            if (mealPlannerUseCase.isSelected(recipe)) {
+                mealPlannerUseCase.removeFromPlanner(recipe);
+                plannerBtn.setText("Add to Planner");
+            } else {
+                mealPlannerUseCase.addToPlanner(recipe);
+                plannerBtn.setText("Remove from Planner");
+            }
+        });
+
+        actions.add(removeBtn);
+        actions.add(plannerBtn);
+
+        center.add(titleBtn);
+        center.add(Box.createVerticalStrut(6));
+        center.add(meta);
+        center.add(Box.createVerticalStrut(8));
+        center.add(actions);
+
+        row.add(center, BorderLayout.CENTER);
+        return row;
+    }
+
+    private void loadImageAsync(String url, JLabel target, int width, int height) {
+        new SwingWorker<ImageIcon, Void>() {
+            @Override
+            protected ImageIcon doInBackground() {
+                try {
+                    BufferedImage img = ImageIO.read(new URL(url));
+                    if (img == null) return null;
+                    Image scaled = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                    return new ImageIcon(scaled);
+                } catch (Throwable t) {
+                    return null;
+                }
+            }
+            @Override
+            protected void done() {
+                try {
+                    ImageIcon icon = get();
+                    if (icon != null) {
+                        target.setText(null);
+                        target.setIcon(icon);
+                    } else {
+                        target.setText("[No image]");
+                        target.setIcon(null);
+                    }
+                } catch (Exception e) {
+                    target.setText("[No image]");
+                    target.setIcon(null);
+                }
+            }
+        }.execute();
+    }
 
     private void createFavSorter() {
         List<Recipe> favourites = favoritesUsecase.getFavourites();
         JPopupMenu sortMenu = new JPopupMenu();
         sortMenu.add(new JLabel("Sort By:"));
 
-        JMenuItem defaultItem = new JMenuItem("Default");
-        defaultItem.addActionListener(e -> {
+        JMenuItem def = new JMenuItem("Default");
+        def.addActionListener(e -> {
             Map<String, String> filters = getFilterCriteria();
-            List<Recipe> filteredFavorites = filterFavorites(originalFavorites, filters);
-            displayFavorites(filteredFavorites);
+            List<Recipe> filtered = filterFavorites(originalFavorites, filters);
+            displayFavorites(filtered);
         });
-        sortMenu.add(defaultItem);
+        sortMenu.add(def);
 
         JMenuItem ingredientItem = new JMenuItem("Least Ingredients");
-        ingredientItem.addActionListener(e -> {
-            RecipeSorterUseCase ingredientSort = new RecipeSorterUseCase("ingredients");
-            ingredientSort.sortRecipes(favourites);
-            displayFavorites(favourites);
-        });
+        ingredientItem.addActionListener(e -> { new RecipeSorterUseCase("ingredients").sortRecipes(favourites); displayFavorites(favourites); });
         sortMenu.add(ingredientItem);
 
         JMenuItem timeItem = new JMenuItem("Least Prep Time");
-        timeItem.addActionListener(e -> {
-            RecipeSorterUseCase timeSort = new RecipeSorterUseCase("time");
-            timeSort.sortRecipes(favourites);
-            displayFavorites(favourites);
-        });
+        timeItem.addActionListener(e -> { new RecipeSorterUseCase("time").sortRecipes(favourites); displayFavorites(favourites); });
         sortMenu.add(timeItem);
 
         JMenuItem leastCalItem = new JMenuItem("Least Calories");
-        leastCalItem.addActionListener(e -> {
-            RecipeSorterUseCase leastCalSort = new RecipeSorterUseCase("caloriesAscending");
-            leastCalSort.sortRecipes(favourites);
-            displayFavorites(favourites);
-        });
+        leastCalItem.addActionListener(e -> { new RecipeSorterUseCase("caloriesAscending").sortRecipes(favourites); displayFavorites(favourites); });
         sortMenu.add(leastCalItem);
 
         JMenuItem mostCalItem = new JMenuItem("Most Calories");
-        mostCalItem.addActionListener(e -> {
-            RecipeSorterUseCase mostCalSort = new RecipeSorterUseCase("caloriesDescending");
-            mostCalSort.sortRecipes(favourites);
-            displayFavorites(favourites);
-        });
+        mostCalItem.addActionListener(e -> { new RecipeSorterUseCase("caloriesDescending").sortRecipes(favourites); displayFavorites(favourites); });
         sortMenu.add(mostCalItem);
 
         JMenuItem mostProtItem = new JMenuItem("Most Protein");
-        mostProtItem.addActionListener(e -> {
-            RecipeSorterUseCase mostProtSort = new RecipeSorterUseCase("proteinDescending");
-            mostProtSort.sortRecipes(favourites);
-            displayFavorites(favourites);
-        });
+        mostProtItem.addActionListener(e -> { new RecipeSorterUseCase("proteinDescending").sortRecipes(favourites); displayFavorites(favourites); });
         sortMenu.add(mostProtItem);
 
         JMenuItem leastFatItem = new JMenuItem("Least Fat");
-        leastFatItem.addActionListener(e -> {
-            RecipeSorterUseCase leastFatSort = new RecipeSorterUseCase("fatAscending");
-            leastFatSort.sortRecipes(favourites);
-            displayFavorites(favourites);
-        });
+        leastFatItem.addActionListener(e -> { new RecipeSorterUseCase("fatAscending").sortRecipes(favourites); displayFavorites(favourites); });
         sortMenu.add(leastFatItem);
 
         JMenuItem leastSugarItem = new JMenuItem("Least Sugar");
-        leastSugarItem.addActionListener(e -> {
-            RecipeSorterUseCase leastSugarSort = new RecipeSorterUseCase("sugarAscending");
-            leastSugarSort.sortRecipes(favourites);
-            displayFavorites(favourites);
-        });
+        leastSugarItem.addActionListener(e -> { new RecipeSorterUseCase("sugarAscending").sortRecipes(favourites); displayFavorites(favourites); });
         sortMenu.add(leastSugarItem);
 
-        /*String[] types = {
-                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks", "American",
-                "Asian", "British", "Caribbean", "Central Europe", "Chinese", "Eastern Europe",
-                "French", "Greek", "Indian", "Italian", "Japanese", "Korean", "Kosher",
-                "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "South American", "South East Asian"
-        };
-
-        for (String type : types) {
-            String menuItemLabel = type + " First";
-            String sorterType = "type" + type;
-
-            JMenuItem menuItem = new JMenuItem(menuItemLabel);
-            menuItem.addActionListener(e -> {
-                RecipeSorterUseCase sorter = new RecipeSorterUseCase(sorterType);
-                sorter.sortRecipes(favourites);
-                displayFavorites(favourites);
-            });
-            sortMenu.add(menuItem);
-        }*/
-
-        sortButton.addActionListener(e -> {
-            sortMenu.show(sortButton, 0, sortButton.getHeight());
-        });
+        for (ActionListener al : sortButton.getActionListeners()) sortButton.removeActionListener(al);
+        sortButton.addActionListener(e -> sortMenu.show(sortButton, 0, sortButton.getHeight()));
     }
 }
