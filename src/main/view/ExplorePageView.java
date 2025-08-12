@@ -27,29 +27,52 @@ public class ExplorePageView extends RecipeView {
     public ExplorePageView(MealPlannerUsecase mpUseCase) {
         super("Explore Page", mpUseCase);
 
-        // Search
+        // Search (runs off the EDT)
         searchButton.addActionListener(e -> {
             Map<String, String> filters = getSearchFilters();
 
-            // Parse comma-separated ingredients into tokens
+            // Comma-separated ingredients -> AND semantics:
+            // send as a single 'q' with spaces, then client-filter to ensure ALL tokens match
             String raw = primaryIngredient.getText().trim();
             List<String> tokens = parseTokens(raw);
-
-            // Build a single Edamam 'q' using spaces (better recall),
-            // then strictly enforce AND client-side so every token must match.
             if (!tokens.isEmpty()) {
                 filters.put("q", String.join(" ", tokens));
             }
 
-            List<Recipe> results = searchRecipesUseCase.execute(filters);
-            if (!tokens.isEmpty()) {
-                results = filterByAllTokens(results, tokens);
-            }
-
-            currentResults = new ArrayList<>(results);
-            updateResults(currentResults);
-            createResultSorter(currentResults);
+            setBusy(true);
+            new SwingWorker<List<Recipe>, Void>() {
+                @Override
+                protected List<Recipe> doInBackground() {
+                    List<Recipe> results = searchRecipesUseCase.execute(filters);
+                    if (!tokens.isEmpty()) {
+                        results = filterByAllTokens(results, tokens);
+                    }
+                    return results;
+                }
+                @Override
+                protected void done() {
+                    try {
+                        currentResults = new ArrayList<>(get());
+                        updateResults(currentResults);
+                        createResultSorter(currentResults);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(resultsContainer,
+                                "Search failed: " + ex.getMessage(),
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    } finally {
+                        setBusy(false);
+                    }
+                }
+            }.execute();
         });
+    }
+
+    /** Disable search & sort and show a wait cursor while background work runs. */
+    private void setBusy(boolean busy) {
+        searchButton.setEnabled(!busy);
+        sortButton.setEnabled(!busy);
+        frame.setCursor(busy ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
+                : Cursor.getDefaultCursor());
     }
 
     /** Split by comma, trim, and drop empties. */
@@ -97,7 +120,7 @@ public class ExplorePageView extends RecipeView {
     private Map<String, String> getSearchFilters() {
         Map<String, String> filters = new HashMap<>();
 
-        // NOTE: 'q' is set later after token parsing; we leave it out here.
+        // 'q' is set after token parsing
 
         String selectedDiet = (String) dietTypeDropdown.getSelectedItem();
         if (selectedDiet != null && !selectedDiet.isEmpty()) {
@@ -115,7 +138,6 @@ public class ExplorePageView extends RecipeView {
 
         // protein is a MIN in the UI; gateway maps proteinMin -> PROCNT=VALUE+
         addNutrientFilter(filters, "proteinMin", protein.getText().trim());
-
         // Others are treated as MAX in the gateway (0-VALUE)
         addNutrientFilter(filters, "fat", maxFat.getText().trim());
         addNutrientFilter(filters, "sugar", maxSugar.getText().trim());
@@ -130,7 +152,7 @@ public class ExplorePageView extends RecipeView {
         }
     }
 
-    /** Render all results into the scrollable grid with image thumbnails. */
+    /** Render all results into the scrollable grid with image thumbnails (loaded async). */
     public void updateResults(List<Recipe> recipes) {
         resultsContainer.removeAll();
 
@@ -143,32 +165,24 @@ public class ExplorePageView extends RecipeView {
                 card.setBorder(BorderFactory.createEtchedBorder());
                 card.setPreferredSize(new Dimension(240, 260));
 
-                // Thumbnail (safe load)
-                String imgUrl = recipe.getImageUrl();
-                JLabel imageLabel;
-                if (imgUrl != null && !imgUrl.isEmpty()) {
-                    try {
-                        BufferedImage img = ImageIO.read(new URL(imgUrl));
-                        if (img != null) {
-                            Image scaled = img.getScaledInstance(200, 130, Image.SCALE_SMOOTH);
-                            imageLabel = new JLabel(new ImageIcon(scaled));
-                        } else {
-                            imageLabel = new JLabel("[No image]");
-                        }
-                    } catch (Throwable ex) {
-                        imageLabel = new JLabel("[No image]");
-                    }
-                } else {
-                    imageLabel = new JLabel("[No image]");
-                }
+                // Placeholder thumbnail
+                JLabel imageLabel = new JLabel("[Loading image]");
                 imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 card.add(Box.createVerticalStrut(6));
                 card.add(imageLabel);
 
+                // Load image off the EDT
+                String imgUrl = recipe.getImageUrl();
+                if (imgUrl != null && !imgUrl.isEmpty()) {
+                    loadImageAsync(imgUrl, imageLabel, 200, 130);
+                } else {
+                    imageLabel.setText("[No image]");
+                }
+
                 // Title button
                 JButton openBtn = new JButton("<html><center>" + recipe.getName() + "</center></html>");
                 openBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-                openBtn.addActionListener(e -> new SingleRecipeView(recipe));
+                openBtn.addActionListener(e -> new SingleRecipeView(recipe, mealPlannerUseCase));
                 card.add(Box.createVerticalStrut(6));
                 card.add(openBtn);
 
@@ -197,6 +211,39 @@ public class ExplorePageView extends RecipeView {
 
         resultsContainer.revalidate();
         resultsContainer.repaint();
+    }
+
+    /** Load and scale an image without blocking the EDT; fall back to text on failure. */
+    private void loadImageAsync(String url, JLabel target, int width, int height) {
+        new SwingWorker<ImageIcon, Void>() {
+            @Override
+            protected ImageIcon doInBackground() {
+                try {
+                    BufferedImage img = ImageIO.read(new URL(url));
+                    if (img == null) return null;
+                    Image scaled = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                    return new ImageIcon(scaled);
+                } catch (Throwable t) {
+                    return null;
+                }
+            }
+            @Override
+            protected void done() {
+                try {
+                    ImageIcon icon = get();
+                    if (icon != null) {
+                        target.setText(null);
+                        target.setIcon(icon);
+                    } else {
+                        target.setText("[No image]");
+                        target.setIcon(null);
+                    }
+                } catch (Exception e) {
+                    target.setText("[No image]");
+                    target.setIcon(null);
+                }
+            }
+        }.execute();
     }
 
     /** Sort menu; re-renders in the scroll grid. */
@@ -286,13 +333,11 @@ public class ExplorePageView extends RecipeView {
         });
         sortMenu.add(leastSugarItem);
 
-
-        /*String[] types = {
-                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks", "American",
-                "Asian", "British", "Caribbean", "Central Europe", "Chinese",
-                "Eastern Europe", "French", "Greek", "Indian", "Italian",
-                "Japanese", "Korean", "Kosher", "Mediterranean", "Mexican",
-                "Middle Eastern", "Nordic", "South American", "South East Asian"
+        String[] types = {
+                "Breakfast", "Dinner", "Lunch", "Snack", "Desserts", "Drinks",
+                "Asian", "British", "Caribbean", "Central Europe", "Chinese", "Eastern Europe",
+                "French", "Greek", "Indian", "Italian", "Japanese", "Korean", "Kosher",
+                "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "South American", "South East Asian"
         };
 
         for (String type : types) {
@@ -307,10 +352,8 @@ public class ExplorePageView extends RecipeView {
                 updateResults(currentResults);
             });
             sortMenu.add(menuItem);
-        }*/
-      
-        sortButton.addActionListener(e -> {
-            sortMenu.show(sortButton, 0, sortButton.getHeight());
-        });
+        }
+
+        sortButton.addActionListener(e -> sortMenu.show(sortButton, 0, sortButton.getHeight()));
     }
 }
