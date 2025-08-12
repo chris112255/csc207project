@@ -6,6 +6,7 @@ import javax.swing.JPanel;
  * The View Manager for the program. It listens for property change events
  * in the ViewManagerModel and updates which View should be visible.
  */
+
 public class ViewManager {
     private final JPanel view;
 
@@ -14,8 +15,6 @@ public class ViewManager {
     }
 
     public static void main(String[] args) {
-        //ExplorePageView explorePageView = new ExplorePageView();
-        //SavedRecipesView savedRecipesView = new SavedRecipesView();
         HomePageView homePageView = new HomePageView();
     }
 }
