@@ -22,4 +22,4 @@ Diddy has a daily goal of macros he aims to hit. He can use the meal planner fun
 
 Katherine often finds herself with leftover or miscellaneous ingredients in her fridge and pantry but doesn’t know what she can make with them. Instead of browsing recipes and checking what she’s missing, she wants the app to do the reverse: input what she has and get a list of recipe matches that use at least one of those ingredients, and the recipes are listed in decreasing order of matched ingredients. (or mostly those ingredients). [Rocky’s Story]  
 
-NNolan has a set of recipes on display, either results from a filtered search or his saved recipes. He would like these recipes to be ordered according to different criteria. He clicks the sort by button, chooses a criterion, and the recipes displayed are reordered accordingly. [Owen’s story] 
+Nolan has a set of recipes on display, either results from a filtered search or his saved recipes. He would like these recipes to be ordered according to different criteria. He clicks the sort by button, chooses a criterion, and the recipes displayed are reordered accordingly. [Owen’s story] 
