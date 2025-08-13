@@ -90,7 +90,19 @@ public class RecipeView extends JPanel {
     }
 
     private void createView() {
-        setLayout(new BorderLayout());
+    setLayout(new BorderLayout());
+
+    JPanel topPanel = new JPanel();
+    topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+
+    JLabel titleLabel = new JLabel(this.title, SwingConstants.CENTER);
+    titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    topPanel.add(titleLabel);
+
+    topPanel.add(createFiltersPanel());
+    add(topPanel, BorderLayout.NORTH);
+    add(createResultsPanel(), BorderLayout.CENTER);
+}
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
