@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SearchRecipesUseCaseTest {
+class SearchRecipesTest {
 
     private SearchRecipesUseCase searchRecipesUseCase;
 

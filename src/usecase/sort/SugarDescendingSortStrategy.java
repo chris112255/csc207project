@@ -10,4 +10,8 @@ public class SugarDescendingSortStrategy implements SortStrategy {
     public void sort(List<Recipe> recipes) {
         Collections.sort(recipes, Comparator.comparing(Recipe::getNutriSugar).reversed());
     }
+
+    @Override
+    public void setTestCriteria(Object testCriteria) {
+    }
 }

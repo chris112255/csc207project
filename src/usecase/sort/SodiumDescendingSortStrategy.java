@@ -10,4 +10,9 @@ public class SodiumDescendingSortStrategy implements SortStrategy {
     public void sort(List<Recipe> recipes) {
         Collections.sort(recipes, Comparator.comparing(Recipe::getNutriSodium).reversed());
     }
+
+    @Override
+    public void setTestCriteria(Object testCriteria) {
+
+    }
 }

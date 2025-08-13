@@ -10,4 +10,8 @@ public class CaloriesAscendingSortStrategy implements SortStrategy {
     public void sort(List<Recipe> recipes) {
         Collections.sort(recipes, Comparator.comparing(Recipe::getNutriCalories));
     }
+
+    @Override
+    public void setTestCriteria(Object testCriteria) {
+    }
 }

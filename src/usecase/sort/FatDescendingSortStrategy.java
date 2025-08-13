@@ -10,4 +10,8 @@ public class FatDescendingSortStrategy implements SortStrategy {
     public void sort(List<Recipe> recipes) {
         Collections.sort(recipes, Comparator.comparing(Recipe::getNutriFat).reversed());
     }
+
+    @Override
+    public void setTestCriteria(Object testCriteria) {
+    }
 }
