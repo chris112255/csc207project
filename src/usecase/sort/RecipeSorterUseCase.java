@@ -10,47 +10,29 @@ public class RecipeSorterUseCase {
 
     private final String sortingCriteria;
     public FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
+    private final Map<String, SortStrategy> strategies = new HashMap<>();
 
     public RecipeSorterUseCase(String sortingCriteria) {
+
         this.sortingCriteria = sortingCriteria;
+        strategies.put("ingredients", new IngredientCountSortStrategy());
+        strategies.put("time", new TimeSortStrategy());
+        strategies.put("caloriesAscending", new CaloriesAscendingSortStrategy());
+        strategies.put("caloriesDescending", new CaloriesDescendingSortStrategy());
+        strategies.put("proteinAscending", new ProteinAscendingSortStrategy());
+        strategies.put("proteinDescending", new ProteinDescendingSortStrategy());
+        strategies.put("fatAscending", new FatAscendingSortStrategy());
+        strategies.put("fatDescending", new FatDescendingSortStrategy());
+        strategies.put("sugarAscending", new SugarAscendingSortStrategy());
+        strategies.put("sugarDescending", new SugarDescendingSortStrategy());
+        strategies.put("sodiumAscending", new SodiumAscendingSortStrategy());
+        strategies.put("sodiumDescending", new SodiumDescendingSortStrategy());
     }
 
     public void sortRecipes(List<Recipe> recipes) {
-        if ("ingredients".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getIngredientCount));
-        }
-        else if ("time".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getPrepTime));
-        }
-        else if ("caloriesAscending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriCalories));
-        }
-        else if ("caloriesDescending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriCalories).reversed());
-        }
-        else if ("proteinAscending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriProtein));
-        }
-        else if ("proteinDescending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriProtein).reversed());
-        }
-        else if ("fatAscending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriFat));
-        }
-        else if ("fatDescending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriFat).reversed());
-        }
-        else if ("sugarAscending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriSugar));
-        }
-        else if ("sugarDescending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriSugar).reversed());
-        }
-        else if ("sodiumAscending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriSodium));
-        }
-        else if ("sodiumDescending".equals(sortingCriteria)) {
-            Collections.sort(recipes, Comparator.comparing(Recipe::getNutriSodium).reversed());
+        SortStrategy strategy = strategies.get(sortingCriteria);
+        if (strategy != null) {
+            strategy.sort(recipes);
         }
         else if (sortingCriteria.startsWith("type")) {
             List<Recipe> sorted = typeSorter(recipes, sortingCriteria.substring(4));
@@ -62,6 +44,7 @@ public class RecipeSorterUseCase {
             recipes.clear();
             recipes.addAll(sorted);
         }
+
     }
 
     private List<Recipe> typeSorter(List<Recipe> recipes, String type) {
