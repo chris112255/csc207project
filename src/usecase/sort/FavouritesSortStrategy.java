@@ -1,77 +1,19 @@
 package usecase.sort;
 
 import entity.Recipe;
+import usecase.FavouritesUsecase;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class RecipeSorterUseCase {
+public class FavouritesSortStrategy implements SortStrategy {
 
-    private final String sortingCriteria;
-    public final Map<String, SortStrategy> strategies = new HashMap<>();
+    private FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
 
-    public RecipeSorterUseCase(String sortingCriteria) {
-
-        this.sortingCriteria = sortingCriteria;
-        strategies.put("ingredients", new IngredientCountSortStrategy());
-        strategies.put("time", new TimeSortStrategy());
-        strategies.put("caloriesAscending", new CaloriesAscendingSortStrategy());
-        strategies.put("caloriesDescending", new CaloriesDescendingSortStrategy());
-        strategies.put("proteinAscending", new ProteinAscendingSortStrategy());
-        strategies.put("proteinDescending", new ProteinDescendingSortStrategy());
-        strategies.put("fatAscending", new FatAscendingSortStrategy());
-        strategies.put("fatDescending", new FatDescendingSortStrategy());
-        strategies.put("sugarAscending", new SugarAscendingSortStrategy());
-        strategies.put("sugarDescending", new SugarDescendingSortStrategy());
-        strategies.put("sodiumAscending", new SodiumAscendingSortStrategy());
-        strategies.put("sodiumDescending", new SodiumDescendingSortStrategy());
-        strategies.put("favs", new FavouritesSortStrategy());
-    }
-
-    public void sortRecipes(List<Recipe> recipes) {
-        SortStrategy strategy = strategies.get(sortingCriteria);
-        if (strategy != null) {
-            strategy.sort(recipes);
-        }
-        /*else if (sortingCriteria.startsWith("type")) {
-            List<Recipe> sorted = typeSorter(recipes, sortingCriteria.substring(4));
-            recipes.clear();
-            recipes.addAll(sorted);
-        }
-        else if ("favs".equals(sortingCriteria)) {
-            List<Recipe> sorted = favSorter(recipes);
-            recipes.clear();
-            recipes.addAll(sorted);
-        }*/
-    }
-
-    /*private List<Recipe> typeSorter(List<Recipe> recipes, String type) {
-        System.out.println("=== Sorting by type: " + type + " ===");
-
-        ArrayList<Recipe> priority = new ArrayList<>();
-        ArrayList<Recipe> nonPriority = new ArrayList<>();
-
-        for (Recipe r : recipes) {
-            boolean matches = type.equalsIgnoreCase(r.getDishType())
-                    || type.equalsIgnoreCase(r.getMealType())
-                    || type.equalsIgnoreCase(r.getCuisineType())
-                    || r.getDietType().stream().anyMatch(d -> d.equalsIgnoreCase(type));
-
-            System.out.println(r.getName() +
-                    " | Dish: " + r.getDishType() +
-                    " | Meal: " + r.getMealType() +
-                    " | Cuisine: " + r.getCuisineType() +
-                    " | Diets: " + r.getDietType() +
-                    " | Matches: " + matches);
-
-            if (matches) priority.add(r);
-            else nonPriority.add(r);
-        }
-
-        priority.addAll(nonPriority);
-        return priority;
-    }
-
-    private List<Recipe> favSorter(List<Recipe> recipes) {
+    @Override
+    public void sort(List<Recipe> recipes) {
         ArrayList<Recipe> favs = (ArrayList<Recipe>) favouritesUsecase.getFavourites();
         HashMap<String, Integer> cuisineCounter = new HashMap<>();
         HashMap<String, Integer> mainIngredientCounter = new HashMap<>();
@@ -143,12 +85,20 @@ public class RecipeSorterUseCase {
             }
             recipeScores.put(r, recipeScore);
         }
-        List<Entry<Recipe, Integer>> recipesByFavs = new ArrayList<>(recipeScores.entrySet());
+        List<Map.Entry<Recipe, Integer>> recipesByFavs = new ArrayList<>(recipeScores.entrySet());
         recipesByFavs.sort(Map.Entry.comparingByValue());
         List sortedRecipes = new ArrayList();
         for (Map.Entry<Recipe, Integer> entry : recipesByFavs) {
             sortedRecipes.add(entry.getKey());
         }
-        return sortedRecipes;
-    }*/
+        recipes.clear();
+        recipes.addAll(sortedRecipes);
+    }
+
+    @Override
+    public void setTestCriteria(Object testCriteria) {
+        if (testCriteria instanceof FavouritesUsecase) {
+            this.favouritesUsecase = (FavouritesUsecase) testCriteria;
+        }
+    }
 }
