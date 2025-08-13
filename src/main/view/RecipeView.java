@@ -38,6 +38,7 @@ public class RecipeView extends JPanel {
         return panel;
     }
 
+    /** Builds the search/filter toolbar used by Explore and Saved views. */
     protected JPanel createFiltersPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
 
@@ -76,10 +77,10 @@ public class RecipeView extends JPanel {
         return panel;
     }
 
-    /** Results area WITH a scroll pane (no pagination buttons). */
-    private JScrollPane createResultsPanel() {
+    /** Results area with a scroll pane. Subclasses can change the container's layout if needed. */
+    protected JScrollPane createResultsPanel() {
         resultsContainer = new JPanel();
-        // default grid; subclasses may change layout (Saved uses BoxLayout)
+        // Default grid; subclasses may change to BoxLayout for full-width rows, etc.
         resultsContainer.setLayout(new GridLayout(0, 4, 12, 12));
         resultsContainer.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
@@ -89,20 +90,9 @@ public class RecipeView extends JPanel {
         return scrollPane;
     }
 
+    /** Assembles the panel: title + filters on top, results in the center. */
     private void createView() {
-    setLayout(new BorderLayout());
-
-    JPanel topPanel = new JPanel();
-    topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-
-    JLabel titleLabel = new JLabel(this.title, SwingConstants.CENTER);
-    titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-    topPanel.add(titleLabel);
-
-    topPanel.add(createFiltersPanel());
-    add(topPanel, BorderLayout.NORTH);
-    add(createResultsPanel(), BorderLayout.CENTER);
-}
+        setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
