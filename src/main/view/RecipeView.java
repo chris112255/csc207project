@@ -5,9 +5,8 @@ import usecase.MealPlannerUsecase;
 import javax.swing.*;
 import java.awt.*;
 
-public class RecipeView {
+public class RecipeView extends JPanel {
     String title;
-    protected JFrame frame;
 
     // Filter fields
     protected JTextField primaryIngredient;
@@ -39,20 +38,7 @@ public class RecipeView {
         return panel;
     }
 
-    private JPanel createTitleBar() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton homeButton = new JButton("Home");
-        homeButton.addActionListener(e -> {
-            frame.dispose();
-            new HomePageView(mealPlannerUseCase);
-        });
-        JLabel label = new JLabel(this.title);
-        panel.add(homeButton);
-        panel.add(label);
-        return panel;
-    }
-
-    private JPanel createFiltersPanel() {
+    protected JPanel createFiltersPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
 
         primaryIngredient = new JTextField(10);
@@ -70,7 +56,6 @@ public class RecipeView {
         panel.add(createInputBox("Max Calories", maxCalories));
 
         protein = new JTextField(6);
-        // CHANGED: label indicates minimum protein
         panel.add(createInputBox("Protein (g min)", protein));
 
         maxFat = new JTextField(6);
@@ -94,7 +79,7 @@ public class RecipeView {
     /** Results area WITH a scroll pane (no pagination buttons). */
     private JScrollPane createResultsPanel() {
         resultsContainer = new JPanel();
-        // 4 columns, as many rows as needed
+        // default grid; subclasses may change layout (Saved uses BoxLayout)
         resultsContainer.setLayout(new GridLayout(0, 4, 12, 12));
         resultsContainer.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
@@ -105,22 +90,34 @@ public class RecipeView {
     }
 
     private void createView() {
-        frame = new JFrame("Recipe Manager");
+    setLayout(new BorderLayout());
 
-        frame.setSize(1250, 750);
+    JPanel topPanel = new JPanel();
+    topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
+    JLabel titleLabel = new JLabel(this.title, SwingConstants.CENTER);
+    titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    topPanel.add(titleLabel);
+
+    topPanel.add(createFiltersPanel());
+    add(topPanel, BorderLayout.NORTH);
+    add(createResultsPanel(), BorderLayout.CENTER);
+}
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.add(createTitleBar());
+
+        JLabel titleLabel = new JLabel(this.title, SwingConstants.CENTER);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        topPanel.add(titleLabel);
+
         topPanel.add(createFiltersPanel());
+        add(topPanel, BorderLayout.NORTH);
+        add(createResultsPanel(), BorderLayout.CENTER);
+    }
 
-        frame.add(topPanel, BorderLayout.NORTH);
-        frame.add(createResultsPanel(), BorderLayout.CENTER);
-
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+    /** Handy for children needing the enclosing window (e.g., to set cursor). */
+    protected Window getWindow() {
+        return SwingUtilities.getWindowAncestor(this);
     }
 }

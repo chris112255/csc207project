@@ -8,8 +8,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
@@ -26,8 +24,7 @@ public class SingleRecipeView {
         this.createView();
     }
 
-    // (Keep this for backward compatibility if other places call it,
-    //  but note it won't share the same planner instance)
+    // Fallback constructor (kept for compatibility)
     public SingleRecipeView(Recipe recipe) {
         this(recipe, new MealPlannerUsecase());
     }
@@ -81,22 +78,23 @@ public class SingleRecipeView {
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(e -> frame.dispose());
 
-        JButton favButton = new JButton(favouritesUsecase.isFavourite(recipe) ? "Remove from Favorites" : "Add to Favorites");
+        // Label logic: Save vs Remove from Saved
+        JButton favButton = new JButton(favouritesUsecase.isFavourite(recipe) ? "Remove from Saved" : "Save Recipe");
         favButton.addActionListener(e -> {
             if (favouritesUsecase.isFavourite(recipe)) {
                 favouritesUsecase.removeFromFavourites(recipe);
-                favButton.setText("Add to Favorites");
-                JOptionPane.showMessageDialog(frame, "Removed from favorites: " + recipe.getName(),
-                        "Favorites", JOptionPane.INFORMATION_MESSAGE);
+                favButton.setText("Save Recipe");
+                JOptionPane.showMessageDialog(frame, "Removed from saved: " + recipe.getName(),
+                        "Saved Recipes", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 favouritesUsecase.addToFavourites(recipe);
-                favButton.setText("Remove from Favorites");
-                JOptionPane.showMessageDialog(frame, "Added to favorites: " + recipe.getName(),
-                        "Favorites", JOptionPane.INFORMATION_MESSAGE);
+                favButton.setText("Remove from Saved");
+                JOptionPane.showMessageDialog(frame, "Saved recipe: " + recipe.getName(),
+                        "Saved Recipes", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
-        // NEW: Add/Remove to Meal Planner
+        // Add/Remove to Meal Planner
         JButton plannerBtn = new JButton(mealPlannerUsecase.isSelected(recipe) ? "Remove from Planner" : "Add to Planner");
         plannerBtn.addActionListener(e -> {
             if (mealPlannerUsecase.isSelected(recipe)) {
@@ -137,7 +135,7 @@ public class SingleRecipeView {
             try {
                 BufferedImage img = ImageIO.read(new URL(url));
                 if (img != null) imagePanel.add(new JLabel(new ImageIcon(img)));
-            } catch (IOException ignored) {
+            } catch (Exception ignored) {
                 imagePanel.add(new JLabel("[No image]"));
             }
         } else {

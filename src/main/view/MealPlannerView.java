@@ -7,9 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class MealPlannerView {
+public class MealPlannerView extends JPanel {
     private final String title = "Meal Planner";
-    JFrame frame = new JFrame(title);
 
     // Inputs
     JTextField maxCalories = new JTextField(8);
@@ -31,58 +30,87 @@ public class MealPlannerView {
     JPanel resultsPanel = new JPanel();
     MacroChartPanel chartPanel = new MacroChartPanel();
 
+    // NEW: holds the dynamic list of selected meals
+    private JPanel mealsPanel;
+
     private final MealPlannerUsecase mealPlannerUsecase;
 
     public MealPlannerView(MealPlannerUsecase mpUsecase) {
-        mealPlannerUsecase = mpUsecase;
+        this.mealPlannerUsecase = mpUsecase;
         createView();
+        refreshMeals(); // populate on start
     }
 
     private void createView() {
-        frame = new JFrame("Meal Planenr");
-        frame.setSize(1100, 650);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.add(createTitleBar());
+
+        JLabel label = new JLabel(this.title, SwingConstants.CENTER);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        topPanel.add(label);
         topPanel.add(createMacrosPanel());
-        frame.add(topPanel, BorderLayout.NORTH);
 
-        frame.add(createMealsListBox(), BorderLayout.CENTER);
-        frame.add(createBottomPanel(), BorderLayout.SOUTH);
-
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        add(topPanel, BorderLayout.NORTH);
+        add(createMealsListBox(), BorderLayout.CENTER);
+        add(createBottomPanel(), BorderLayout.SOUTH);
     }
 
-    private JPanel createMealsListBox() {
-        JPanel panel = new JPanel();
-
-        JPanel mealsPanel = new JPanel();
+    /** Container with a scrollable mealsPanel we can rebuild at will */
+    private JComponent createMealsListBox() {
+        mealsPanel = new JPanel();
         mealsPanel.setLayout(new BoxLayout(mealsPanel, BoxLayout.Y_AXIS));
-        JLabel titleLabel = new JLabel("Selected Meals");
-        mealsPanel.add(titleLabel);
+        JScrollPane sp = new JScrollPane(mealsPanel);
+        sp.setBorder(null);
+        return sp;
+    }
 
-        for (int i = 0; i < mealPlannerUsecase.getMeals().size(); i++) {
-            JPanel mealPanel = new JPanel();
-            JLabel mealLabel = new JLabel(mealPlannerUsecase.getMeals().get(i).getName());
-            JButton removeMealButton = new JButton("Remove Meal");
-            int finalI = i;
-            removeMealButton.addActionListener(e -> {
-                mealPlannerUsecase.removeFromPlanner(mealPlannerUsecase.getMeals().get(finalI));
-                mealsPanel.remove(mealPanel);
-                mealsPanel.revalidate();
-                mealsPanel.repaint();
+    /** Rebuild the Selected Meals list from current usecase state (and sync chart) */
+    public void refreshMeals() {
+        mealsPanel.removeAll();
+
+        JLabel titleLabel = new JLabel("Selected Meals");
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        mealsPanel.add(titleLabel);
+        mealsPanel.add(Box.createVerticalStrut(6));
+
+        for (Recipe r : mealPlannerUsecase.getMeals()) {
+            JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
+            JLabel name = new JLabel(r.getName());
+            JButton remove = new JButton("Remove Meal");
+            remove.addActionListener(e -> {
+                mealPlannerUsecase.removeFromPlanner(r);
+                refreshMeals(); // rebuild list + sync chart
             });
-            mealPanel.add(mealLabel);
-            mealPanel.add(removeMealButton);
-            mealsPanel.add(mealPanel);
+            JButton view = new JButton("View");
+            view.addActionListener(e -> new SingleRecipeView(r, mealPlannerUsecase));
+
+            row.add(name);
+            row.add(remove);
+            row.add(view);
+            mealsPanel.add(row);
         }
 
-        panel.add(mealsPanel);
-        return panel;
+        mealsPanel.revalidate();
+        mealsPanel.repaint();
+
+        // keep the chart reflecting current totals vs saved goals
+        syncChart();
+    }
+
+    private void syncChart() {
+        chartPanel.updateData(
+                mealPlannerUsecase.getTotalCalories(),
+                mealPlannerUsecase.getTotalProtein(),
+                mealPlannerUsecase.getTotalCarbs(),
+                mealPlannerUsecase.getTotalFat(),
+                mealPlannerUsecase.getMinCaloriesGoal(),
+                mealPlannerUsecase.getMaxCaloriesGoal(),
+                mealPlannerUsecase.getMinProteinGoal(),
+                mealPlannerUsecase.getMaxCarbsGoal(),
+                mealPlannerUsecase.getMaxFatGoal()
+        );
     }
 
     private JPanel createBottomPanel() {
@@ -115,19 +143,6 @@ public class MealPlannerView {
         return panel;
     }
 
-    private JPanel createTitleBar() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton homeButton = new JButton("Home");
-        homeButton.addActionListener(e -> {
-            frame.dispose();
-            new HomePageView(mealPlannerUsecase);
-        });
-        JLabel label = new JLabel(this.title);
-        panel.add(homeButton);
-        panel.add(label);
-        return panel;
-    }
-
     private JPanel createMacrosPanel() {
         JPanel root = new JPanel(new BorderLayout());
 
@@ -147,10 +162,10 @@ public class MealPlannerView {
 
             mealPlannerUsecase.saveGoals(minCal, maxCal, mCarbs, mFat, minPro);
             savedGoalsSummary.setText(buildGoalsSummary());
-            JOptionPane.showMessageDialog(frame, "Goals saved.", "Meal Planner", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Goals saved.", "Meal Planner", JOptionPane.INFORMATION_MESSAGE);
+            syncChart();
         });
 
-        // >>> Changed: use nullable parse; hide labels when field blank <<<
         calculateButton.addActionListener(e -> {
             Integer minCal = parseOrNull(minCalories.getText());
             Integer maxCal = parseOrNull(maxCalories.getText());
@@ -158,7 +173,7 @@ public class MealPlannerView {
             Integer mFat   = parseOrNull(maxFat.getText());
             Integer minPro = parseOrNull(minProtein.getText());
 
-            resultsCalories.setText(""); // clear all
+            resultsCalories.setText("");
             resultsCarbs.setText("");
             resultsFat.setText("");
             resultsProtein.setText("");
@@ -176,18 +191,7 @@ public class MealPlannerView {
             resultsPanel.revalidate();
             resultsPanel.repaint();
 
-            // Chart still compares SAVED goals vs totals
-            chartPanel.updateData(
-                    mealPlannerUsecase.getTotalCalories(),
-                    mealPlannerUsecase.getTotalProtein(),
-                    mealPlannerUsecase.getTotalCarbs(),
-                    mealPlannerUsecase.getTotalFat(),
-                    mealPlannerUsecase.getMinCaloriesGoal(),
-                    mealPlannerUsecase.getMaxCaloriesGoal(),
-                    mealPlannerUsecase.getMinProteinGoal(),
-                    mealPlannerUsecase.getMaxCarbsGoal(),
-                    mealPlannerUsecase.getMaxFatGoal()
-            );
+            syncChart();
         });
 
         inputRow.add(saveGoalsButton);
@@ -227,7 +231,7 @@ public class MealPlannerView {
         catch (NumberFormatException e) { return null; }
     }
 
-    // (MacroChartPanel stays the same as in the previous version)
+    // (same chart as before)
     static class MacroChartPanel extends JPanel {
         private float actualCalories, actualProtein, actualCarbs, actualFat;
         private Integer minCal, maxCal, minPro, maxCarbs, maxFat;
@@ -266,9 +270,7 @@ public class MealPlannerView {
             };
 
             float maxVal = 0f;
-            for (int i = 0; i < labels.length; i++) {
-                maxVal = Math.max(maxVal, Math.max(actual[i], goals[i]));
-            }
+            for (int i = 0; i < labels.length; i++) maxVal = Math.max(maxVal, Math.max(actual[i], goals[i]));
             if (minCal != null && maxCal != null) maxVal = Math.max(maxVal, maxCal);
             if (maxVal <= 0) maxVal = 1f;
 
