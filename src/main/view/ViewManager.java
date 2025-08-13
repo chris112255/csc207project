@@ -1,8 +1,6 @@
 package main.view;
 
-import api.EdamamRecipeSearchGateway;
 import usecase.MealPlannerUsecase;
-import usecase.search.SearchRecipesUseCase;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +19,12 @@ public class ViewManager {
 
     // Persisted use case for the whole session
     private final MealPlannerUsecase plannerUsecase = new MealPlannerUsecase();
+
+    // Panels created once so state persists
+    private final HomePageView homePanel;
+    private final ExplorePageView explorePanel;
+    private final SavedRecipesView savedPanel;
+    private final MealPlannerView plannerPanel;
 
     public ViewManager() {
         // ----- Window -----
@@ -42,26 +46,22 @@ public class ViewManager {
         frame.add(nav, BorderLayout.NORTH);
 
         // ----- Cards container -----
-        cards = new JPanel();
         cl = new CardLayout();
-        cards.setLayout(cl);
+        cards = new JPanel(cl);
 
-        // Views
-        SearchRecipesUseCase searchUseCase =
-                new SearchRecipesUseCase(new EdamamRecipeSearchGateway());
+        // Create panels (planner first so lambdas can call refreshMeals)
+        plannerPanel = new MealPlannerView(plannerUsecase);
+        explorePanel = new ExplorePageView(plannerUsecase);
+        savedPanel   = new SavedRecipesView(plannerUsecase);
 
-        ExplorePageView explorePanel = new ExplorePageView(searchUseCase);
-        SavedRecipesView savedPanel  = new SavedRecipesView();
-        MealPlannerView plannerPanel = new MealPlannerView(plannerUsecase);
-
-        HomePageView homePanel = new HomePageView(
+        homePanel = new HomePageView(
                 () -> cl.show(cards, CARD_EXPLORE),
                 () -> cl.show(cards, CARD_SAVED),
                 () -> { plannerPanel.refreshMeals(); cl.show(cards, CARD_PLANNER); }
         );
 
         // Add cards
-        cards.add(homePanel,   CARD_HOME);
+        cards.add(homePanel,    CARD_HOME);
         cards.add(explorePanel, CARD_EXPLORE);
         cards.add(savedPanel,   CARD_SAVED);
         cards.add(plannerPanel, CARD_PLANNER);
@@ -84,7 +84,6 @@ public class ViewManager {
     }
 
     public static void main(String[] args) {
-        // Keep rocky.tu’s approach: launch ViewManager on the EDT
         SwingUtilities.invokeLater(ViewManager::new);
     }
 }
