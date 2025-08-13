@@ -42,8 +42,7 @@ As our program is digital, this principle doesn’t really apply to it.
 
 3. Write a paragraph about whether or not your program is less likely to be used by certain demographics. Your discussion here should be informed by the content of our embedded ethics modules this term.
 
-  Unfortunately, our program in its current state is most likely to be less used by people who are blind, visually impaired, and those who have issues with motor skills. As our program does not have support for screen readers or any sort of sound feedback, blind users would not be able to use the program. Similarly, visually impaired people might have trouble reading the relatively small fonts and navigating menus due to a lack of zooming and high contrast color schemes. Additionally, people who struggle with motor skills might have trouble navigating menus due to the relatively small buttons and text fields. 
-
+	Unfortunately, our program in its current state is most likely to be less used by people who are blind, visually impaired, and those who have issues with motor skills. To address these shortcomings, we could appeal to the social model of disabilities by adding screen readers, zoom options, higher color contrast, as well as largening buttons and text fields. Screen readers would aid blind users as without any sort of sound feedback, blind users would not be able to use the program. Similarly, visually impaired people might have trouble reading the relatively small fonts and navigating menus due to a lack of zooming and high contrast color schemes. Additionally, people who struggle with motor skills might have trouble navigating menus due to the relatively small buttons and text fields. These changes aim to allow all users a more effective way to use the program whether or not they identify as disabled or not. 
 
 
 
@@ -61,3 +60,4 @@ As our program is digital, this principle doesn’t really apply to it.
 
 
 	
+
