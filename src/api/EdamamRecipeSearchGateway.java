@@ -5,7 +5,7 @@ import entity.Recipe;
 import entity.RecipeBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import usecase.search.RecipeSearchGateway;
+import use_case.search.RecipeSearchGateway;
 
 import java.io.BufferedReader;
 import java.io.IOException;

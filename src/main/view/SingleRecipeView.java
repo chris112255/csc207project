@@ -1,8 +1,8 @@
 package main.view;
 
 import entity.Recipe;
-import usecase.FavouritesUsecase;
-import usecase.MealPlannerUsecase;
+import use_case.favourites.FavouritesUsecase;
+import use_case.MealPlannerUsecase;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
