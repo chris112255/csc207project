@@ -1,4 +1,4 @@
-package test.usecase;
+package test.interactor;
 
 import entity.Nutrients;
 import entity.Recipe;
