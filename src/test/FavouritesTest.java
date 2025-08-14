@@ -11,7 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FavouritesUsecaseTest {
+class FavouritesTest {
     private static final String FAVOURITES_FILE = "favourites.txt";
     private static File originalFileBackup;
     private FavouritesUsecase favouritesUsecase;
@@ -33,9 +33,7 @@ class FavouritesUsecaseTest {
         // Restore original file from backup
         if (originalFileBackup != null && originalFileBackup.exists()) {
             File original = new File(FAVOURITES_FILE);
-            if (original.exists()) {
-                original.delete();
-            }
+
             copyFile(originalFileBackup, original);
             originalFileBackup.delete();
         }
@@ -131,7 +129,6 @@ class FavouritesUsecaseTest {
         favouritesUsecase.addToFavourites(recipe1);
         favouritesUsecase.addToFavourites(recipe2);
 
-        // Create new instance which should load from file
         FavouritesUsecase newInstance = new FavouritesUsecase();
         assertEquals(2, newInstance.getFavourites().size());
     }

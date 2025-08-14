@@ -10,4 +10,8 @@ public class TimeSortStrategy implements SortStrategy {
     public void sort(List<Recipe> recipes) {
         Collections.sort(recipes, Comparator.comparing(Recipe::getPrepTime));
     }
+
+    @Override
+    public void setTestCriteria(Object testCriteria) {
+    }
 }

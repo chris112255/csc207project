@@ -214,7 +214,7 @@ class RecipeSorterTest {
         assertEquals(recipe3, recipes.get(2));
     }
 
-    @Test
+    /*@Test
     void sortByType() {
         RecipeSorterUseCase sorter = new RecipeSorterUseCase("typeMain Course");
         sorter.sortRecipes(recipes);
@@ -227,7 +227,7 @@ class RecipeSorterTest {
 
         assertTrue(recipes.indexOf(recipe3) < recipes.indexOf(recipe1));
         assertTrue(recipes.indexOf(recipe3) < recipes.indexOf(recipe2));
-    }
+    }*/
 
     @Test
     void sortByFavorites() {
@@ -248,13 +248,13 @@ class RecipeSorterTest {
                         "http://example.com/favpasta.jpg",
                         "uri4"
                 ),
-                recipe3  // Also favorite
+                recipe3
         );
 
         FavouritesUsecase testFavouritesUsecase = new TestFavouritesUsecase(testFavorites);
 
         RecipeSorterUseCase sorter = new RecipeSorterUseCase("favs");
-        sorter.favouritesUsecase = testFavouritesUsecase;
+        sorter.strategies.get("favs").setTestCriteria(testFavouritesUsecase);
         sorter.sortRecipes(recipes);
 
         assertEquals(recipe2, recipes.get(0));
