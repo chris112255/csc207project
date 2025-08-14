@@ -1,4 +1,4 @@
-package usecase;
+package use_case.favourites;
 
 import api.EdamamRecipeSearchGateway;
 import entity.Recipe;
@@ -91,7 +91,6 @@ public class FavouritesUsecase {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("\\|", 3);
-                //System.out.println(parts.length);
 
                 EdamamRecipeSearchGateway gateway = new EdamamRecipeSearchGateway();
 
@@ -103,9 +102,7 @@ public class FavouritesUsecase {
                     favourites.add(recipe);
                 }
             }
-            System.out.println("Loaded " + favourites.size() + " favourites from file");
         } catch (IOException e) {
-            System.err.println("Error loading favourites: " + e.getMessage());
         }
     }
 }

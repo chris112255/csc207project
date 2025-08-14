@@ -1,6 +1,6 @@
 package main.view;
 
-import usecase.MealPlannerUsecase;
+import use_case.MealPlannerUsecase;
 
 import javax.swing.*;
 import java.awt.*;

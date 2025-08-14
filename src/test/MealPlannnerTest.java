@@ -4,10 +4,9 @@ import entity.Recipe;
 import entity.Nutrients;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import usecase.MealPlannerUsecase;
+import use_case.MealPlannerUsecase;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

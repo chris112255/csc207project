@@ -1,14 +1,20 @@
 package main.view;
 
-import usecase.FavouritesUsecase;
 import entity.Recipe;
-import usecase.MealPlannerUsecase;
-import usecase.sort.RecipeSorterUseCase;
+import use_case.MealPlannerUsecase;
+import use_case.sort.RecipeSorterUseCase;
+
+import interface_adapter.favourites.FavouritesController;
+import interface_adapter.favourites.FavouritesState;
+import interface_adapter.favourites.FavouritesViewModel;
+import data_access.FileRecipeDataAccessObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +22,14 @@ import java.util.Map;
 import java.util.HashMap;
 import java.awt.event.ActionListener;
 
-public class SavedRecipesView extends RecipeView {
-    private final FavouritesUsecase favoritesUsecase = new FavouritesUsecase();
+public class SavedRecipesView extends RecipeView implements PropertyChangeListener {
+
+    private final FileRecipeDataAccessObject dataAccess = new FileRecipeDataAccessObject();
     private List<Recipe> originalFavorites = new ArrayList<>();
+
+    private FavouritesController favouritesController;
+    private FavouritesViewModel favouritesViewModel;
+
 
     public SavedRecipesView(MealPlannerUsecase mpUseCase) {
         super("Saved Recipes", mpUseCase);
@@ -27,7 +38,6 @@ public class SavedRecipesView extends RecipeView {
         resultsContainer.setLayout(new BoxLayout(resultsContainer, BoxLayout.Y_AXIS));
 
         loadFavorites();
-
         searchButton.addActionListener(e -> {
             Map<String, String> filters = getFilterCriteria();
             List<Recipe> filteredFavorites = filterFavorites(originalFavorites, filters);
@@ -36,6 +46,33 @@ public class SavedRecipesView extends RecipeView {
 
         createFavSorter();
     }
+
+    public void setFavouritesController(FavouritesController favouritesController) {
+        this.favouritesController = favouritesController;
+    }
+
+    public void setFavouritesViewModel(FavouritesViewModel favouritesViewModel) {
+        System.out.println("*** Setting favourites view model ***");
+        this.favouritesViewModel = favouritesViewModel;
+        this.favouritesViewModel.addPropertyChangeListener(this);
+        System.out.println("Property change listener added to favourites view model");
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        final FavouritesState state = (FavouritesState) evt.getNewValue();
+        if (state.getFavouritesError() != null) {
+            JOptionPane.showMessageDialog(this, state.getFavouritesError());
+        } else if (state.getMessage() != null) {
+
+            SwingUtilities.invokeLater(() -> {
+                loadFavorites();
+                forceRefresh();  // Force refresh
+                System.out.println("View refreshed!");
+            });
+        }
+    }
+
 
     private Map<String, String> getFilterCriteria() {
         Map<String, String> filters = new HashMap<>();
@@ -125,8 +162,20 @@ public class SavedRecipesView extends RecipeView {
         return out;
     }
 
-    private void loadFavorites() {
-        List<Recipe> favorites = favoritesUsecase.getFavourites();
+    public void forceRefresh() {
+
+        FileRecipeDataAccessObject freshDataAccess = new FileRecipeDataAccessObject();
+        List<Recipe> freshFavorites = freshDataAccess.getAllFavourites();
+
+        originalFavorites = new ArrayList<>(freshFavorites);
+        displayFavorites(freshFavorites);
+
+        this.revalidate();
+        this.repaint();
+    }
+
+    public void loadFavorites() {
+        List<Recipe> favorites = dataAccess.getAllFavourites();
         originalFavorites = new ArrayList<>(favorites);
         displayFavorites(favorites);
     }
@@ -188,12 +237,13 @@ public class SavedRecipesView extends RecipeView {
 
         JButton removeBtn = new JButton("Remove from Saved");
         removeBtn.addActionListener(e -> {
-            favoritesUsecase.removeFromFavourites(recipe);
-            JOptionPane.showMessageDialog(resultsContainer,
-                    "Removed from Saved: " + recipe.getName(),
-                    "Saved", JOptionPane.INFORMATION_MESSAGE);
-            loadFavorites();
+            if (favouritesController != null) {
+                favouritesController.executeRemove(recipe);
+            } else {
+                JOptionPane.showMessageDialog(this, "Favourites system not initialized");
+            }
         });
+
 
         JButton plannerBtn = new JButton(mealPlannerUseCase.isSelected(recipe) ? "Remove from Planner" : "Add to Planner");
         plannerBtn.addActionListener(e -> {
@@ -252,7 +302,8 @@ public class SavedRecipesView extends RecipeView {
     }
 
     private void createFavSorter() {
-        List<Recipe> favourites = favoritesUsecase.getFavourites();
+        //List<Recipe> favourites = favoritesUsecase.getFavourites();
+        List<Recipe> favourites = dataAccess.getAllFavourites();
         JPopupMenu sortMenu = new JPopupMenu();
         sortMenu.add(new JLabel("Sort By:"));
 

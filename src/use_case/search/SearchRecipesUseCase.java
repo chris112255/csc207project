@@ -1,4 +1,4 @@
-package usecase.search;
+package use_case.search;
 
 import entity.Recipe;
 import java.util.ArrayList;

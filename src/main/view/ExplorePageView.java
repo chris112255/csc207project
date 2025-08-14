@@ -2,10 +2,11 @@ package main.view;
 
 import api.EdamamRecipeSearchGateway;
 import entity.Recipe;
-import usecase.FavouritesUsecase;
-import usecase.MealPlannerUsecase;
-import usecase.search.SearchRecipesUseCase;
-import usecase.sort.RecipeSorterUseCase;
+import interface_adapter.favourites.FavouritesController;
+import use_case.MealPlannerUsecase;
+import use_case.search.SearchRecipesUseCase;
+import use_case.sort.RecipeSorterUseCase;
+import data_access.FileRecipeDataAccessObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -20,10 +21,10 @@ public class ExplorePageView extends RecipeView {
 
     private final SearchRecipesUseCase searchRecipesUseCase =
             new SearchRecipesUseCase(new EdamamRecipeSearchGateway());
-
-    private final FavouritesUsecase favouritesUsecase = new FavouritesUsecase();
+    private FavouritesController favouritesController;
+    private final FileRecipeDataAccessObject dataAccess = new FileRecipeDataAccessObject();
     private List<Recipe> currentResults = new ArrayList<>();
-
+    private Map<Recipe, JButton> favoriteButtons = new HashMap<>();
     public ExplorePageView(MealPlannerUsecase mpUseCase) {
         super("Explore Page", mpUseCase);
 
@@ -144,9 +145,14 @@ public class ExplorePageView extends RecipeView {
         if (!value.isEmpty()) filters.put(nutrient, value);
     }
 
+    private boolean isFavourite(Recipe recipe) {
+        return dataAccess.existsByUri(recipe.getUri());
+    }
+
     /** Render all results into the scrollable grid with image thumbnails (loaded async). */
     public void updateResults(List<Recipe> recipes) {
         resultsContainer.removeAll();
+        favoriteButtons.clear();
 
         if (recipes == null || recipes.isEmpty()) {
             resultsContainer.add(new JLabel("No recipes found. Try adjusting your search criteria."));
@@ -179,21 +185,11 @@ public class ExplorePageView extends RecipeView {
                 card.add(openBtn);
 
                 // Save/Remove toggle (labels updated)
-                JButton favBtn = new JButton(favouritesUsecase.isFavourite(recipe) ? "Remove from Saved" : "Save Recipe");
+                JButton favBtn = new JButton(isFavourite(recipe) ? "Remove from Saved" : "Save Recipe");
                 favBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-                favBtn.addActionListener(e -> {
-                    if (favouritesUsecase.isFavourite(recipe)) {
-                        favouritesUsecase.removeFromFavourites(recipe);
-                        favBtn.setText("Save Recipe");
-                        JOptionPane.showMessageDialog(resultsContainer, "Removed from saved: " + recipe.getName(),
-                                "Saved Recipes", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        favouritesUsecase.addToFavourites(recipe);
-                        favBtn.setText("Remove from Saved");
-                        JOptionPane.showMessageDialog(resultsContainer, "Saved recipe: " + recipe.getName(),
-                                "Saved Recipes", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                });
+                favBtn.addActionListener(e -> handleFavouriteAction(recipe, favBtn));
+                favoriteButtons.put(recipe, favBtn);
+
                 card.add(Box.createVerticalStrut(4));
                 card.add(favBtn);
 
@@ -331,4 +327,28 @@ public class ExplorePageView extends RecipeView {
         }
         sortButton.addActionListener(e -> sortMenu.show(sortButton, 0, sortButton.getHeight()));
     }
+
+    public void setFavouritesController(FavouritesController controller) {
+        this.favouritesController = controller;
+    }
+
+    private void handleFavouriteAction(Recipe recipe, JButton favBtn) {
+        if (favouritesController != null) {
+            String currentText = favBtn.getText();
+
+            if (currentText.equals("Remove from Saved")) {
+                favouritesController.executeRemove(recipe);
+                JOptionPane.showMessageDialog(this, "Removed from saved: " + recipe.getName());
+                favBtn.setText("Save Recipe");
+            } else {
+                favouritesController.executeAdd(recipe);
+                JOptionPane.showMessageDialog(this, "Added to saved: " + recipe.getName());
+                favBtn.setText("Remove from Saved");
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Favourites system not initialized");
+        }
+    }
+
 }
