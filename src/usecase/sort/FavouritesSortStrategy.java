@@ -1,7 +1,7 @@
 package usecase.sort;
 
 import entity.Recipe;
-import usecase.FavouritesUsecase;
+import usecase.favourites.FavouritesUsecase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
