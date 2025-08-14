@@ -1,33 +1,224 @@
-# CSC207 Project
-User Stories: 
+# Recipe Manager
 
-The user wants a page where they can easily go to their saved recipes or a page where they can add recipes to their saved recipes. [Team Story]
+**Authors:** Rocky Tu, Chris Zheng, Huzaifah Naseem, Owen Lo
 
-Use Case: By running the program, a jframe is opened where there are three buttons: "Favourites", "Search Recipes" and "Meal Planner".
+---
 
-User Story: The user wants to find recipes that match their dietary preferences and ingredient requirements so they can discover new meals to cook. [Huzaifah's Story]
-Use Case: When the user enters ingredients in the search field and selects dietary filters like protein requirements or calorie limits, the system queries the Edamam API with these parameters. The system then displays matching recipes in the panel. If no recipes match the criteria, the system shows a "No recipes found" message and suggests adjusting the search parameters.
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage Guide](#usage-guide)
+- [Technical Overview](#technical-overview)
+- [License](#license)
+- [Feedback](#feedback)
+- [Contributing](#contributing)
 
-User Story: The user wants to filter recipe results using specific nutritional constraints and dietary restrictions so they can find recipes that align with their health goals. [Huzaifah's Story]
-Use Case: The user goes on the search page and enters specific nutritional limits such as minimum protein grams, maximum fat grams, maximum sugar grams, and maximum carbohydrates. When the user clicks search, the system combines all these filters into a single API request to Edamam and returns only recipes that meet all specified criteria. If the filters are too restrictive and return no results, the system displays a message suggesting the user adjust their criteria for better results.
+---
 
+## Overview
 
-The user wantes to save recipes from the search page and they want to be able to remove them as needed. [Huzaifah's Story]
-Use Case: Clicking the "save" button under a recipe checks if a recipe is already in favourites; If it isn't it saves it, if it is, it displays a message saying it is. If the recipe is saved, the button changes to "Remove from Saved" and there is a popup confirming the save. The saved recipe window is automatically refreshed when this happens, and the recipe now appears under saved recipe view. In this new page, the user can remove the recipe from favourites, and the button in the search page is updated to "Save" instead of "remove from favourites".
+**Recipe Manager** is a Java Swing desktop application for finding, saving, and planning meals with custom nutrition goals.
 
-Use Case: The "Search Recipes" button opens a new jframe that allows the user to search for recipes based on their needs. For example they can search the main ingredient, or search recipes based on their macro requirements.
+The app integrates with the **Edamam Recipe API** to search for recipes based on ingredients, diets, and macro targets. Users can save their favorite recipes locally, plan meals for the day, and compare their total nutrient intake against their goals using a visual chart.
 
-Use Case: The "Meal Planner" button opens a new jframe that allows the user to set macro goals and see how if their planned meals reach the goals or not and by how much. 
+**Why this project exists:**
+We wanted a single-window meal planning tool that:
+- Searches recipes from a trusted source (Edamam)
+- Tracks nutritional macros
+- Plans multiple meals with visual feedback
+- Saves and reloads favorites locally for offline review
 
-The user has saved some of their favorite recipes in the past but is now on a diet. They will be able to filter their recipes according to their macro requirements, allergies, type of diet, the number of ingredients, and the main ingredient in the recipe. The user should also be able to delete recipes from their favorites. [Team Story] 
+---
 
-Use Case: On the "Favourites" Jframe, there are several text fields which allow the user to filter.
+## Features
 
+### Explore Recipes
+- Search by ingredient(s), diet, calories, and macro limits.
+- Comma-separated multi-ingredient matching (must match all).
+- Sort results by:
+    - Similar to favourites
+    - Least ingredients
+    - Least prep time
+    - Least/most calories
+    - Most protein
+    - Least fat
+    - Least sugar
+- Async image loading for responsive UI.
+
+![Explore Recipes Screenshot](images/search_page.jpg)
+
+---
+
+### Saved Recipes
+- View all locally saved recipes (persisted to `favourites.txt`).
+- Filter saved recipes by the same criteria as Explore.
+- Remove from saved list with one click.
+- Add saved recipes directly to the Meal Planner.
+
+![Saved Recipes Screenshot](images/saved_recipe.jpg)
+
+---
+
+### Meal Planner
+- Add/remove recipes from the daily plan.
+- Set **min/max daily calorie**, **max carbs**, **max fat**, **min protein** goals.
+- Save goals for persistent reference.
+- Calculate current totals and see if you’re **within goal**, **over**, or **under**.
+- Visual chart shows:
+    - Actual vs goal macros
+    - Min–max calorie range band
+    - Red/blue bars for pass/fail status.
+
+![Meal Planner Screenshot](images/meal_planner.jpg)
+
+---
+
+### Single Recipe View
+- View detailed nutrition, ingredients, and dish types.
+- Add/remove from favourites or planner.
+- Go directly to the recipe’s source link.
+
+![Single Recipe Screenshot](images/single_recipe.jpg)
+
+---
+
+## Installation
+
+### Prerequisites
+- **Java 17** or newer
+- Internet connection (for API calls)
+- An [Edamam Recipe Search API key](https://developer.edamam.com/edamam-recipe-api)
+
+### Steps
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/chris112255/csc207project.git
+   cd recipe-manager
+
+2. Add your Edamam API credentials:
+  - Open `api/EdamamRecipeSearchGateway.java`
+  - Replace `APP_ID` and `APP_KEY` with your own:
+    ```java
+    private static final String APP_ID = "your_app_id";
+    private static final String APP_KEY = "your_app_key";
+    ```
+
+3. Compile and run:
+   ```bash
+   javac -d out $(find src -name "*.java")
+   java -cp out main.view.ViewManager
  
-User Story: For sugar: The user clicks on the recipe he wants to create. It opens a new jframe specifying details of the recipe, and if there is more than 15% daily value of a macro, it will display a warning specifying it on the recipes jframe.
+Note: For easier builds, you can use IntelliJ IDEA or Eclipse—just import the src folder as a project.
 
-Diddy has a daily goal of macros he aims to hit. He can use the meal planner function and add his goals in the form of minimum and maximum calories, max fats, max carbohydrates, and minimum protein. Then, we he finds plans his meals, he can add them to the meal planner and it will calculate for each macro if it falls within his goal or not and by how much, allowing him to better plan his meals in order to reach his macro goals. [Chris’ Story] 
+---
 
-Katherine often finds herself with leftover or miscellaneous ingredients in her fridge and pantry but doesn’t know what she can make with them. Instead of browsing recipes and checking what she’s missing, she wants the app to do the reverse: input what she has and get a list of recipe matches that use at least one of those ingredients, and the recipes are listed in decreasing order of matched ingredients. (or mostly those ingredients). [Rocky’s Story]  
+## Usage Guide
 
-Nolan has a set of recipes on display, either results from a filtered search or his saved recipes. He would like these recipes to be ordered according to different criteria. He clicks the sort by button, chooses a criterion, and the recipes displayed are reordered accordingly. [Owen’s story] 
+## Usage Guide
+
+1. **Home (Boiling Pot)**
+   After cloning the repo and adding your Edamam API keys, run the app to land on the **Home** page with a boiling‑pot ASCII animation.  
+   _Screenshot:_  
+   ![Home Page](images/home-page.jpg)
+
+2. **Explore Recipes**
+  - Go to **Search Recipes**.
+  - Filter by ingredient(s), diet, calories, and macro limits; click **Search**.
+  - Click a card’s **Save Recipe** to store it locally (written to `favourites.txt`).  
+    _Screenshot:_  
+    ![Search / Explore Page](images/search_page.jpg)
+
+3. **Saved Recipes**
+  - Open **Saved Recipes** to see everything you’ve saved.
+  - You can filter/sort, remove items, or add them directly to the **Meal Planner**.  
+    _Screenshot:_  
+    ![Saved Recipes](images/saved_recipe.jpg)
+
+4. **Single Recipe View**
+  - Click any recipe title to open the **Single Recipe** window.
+  - From here you can:
+    - **Add to Planner** (or remove) to include it in your daily plan.
+    - **Go to Recipe** to open the source website with full cooking instructions.  
+      _Screenshot:_  
+      ![Single Recipe View](images/single_recipe.jpg)
+
+5. **Meal Planner & Goals**
+  - Open **Meal Planner** to review the recipes you’ve added.
+  - Define your nutritional goals:
+    - **Min/Max Calories**, **Max Carbs**, **Max Fat**, **Min Protein**.
+  - Click **Save Goals** to persist them for the session.
+  - Click **Calculate** to compare your current plan vs. goals:
+    - See totals and pass/over/under status.
+    - View a chart with your **actual vs. goal** macros and a calorie band.  
+      _Screenshot:_  
+      ![Meal Planner](images/meal_planner.jpg)
+
+---
+
+## Technical Overview
+
+### Architecture
+
+The project follows a **Clean Architecture** structure:
+
+- **Entities**
+  - `Recipe` — core domain model with ingredients, nutrients, and warnings.
+  - `Nutrients` — encapsulates macro/micro values.
+  - `RecipeBuilder` — converts Edamam JSON → `Recipe`.
+
+- **Use Cases**
+  - `SearchRecipesUseCase` — coordinates recipe search via gateway.
+  - `FavouritesUsecase` — local persistence for saved recipes.
+  - `MealPlannerUsecase` — manages selected meals, goals, and macro evaluation.
+
+- **Interface Adapters**
+  - `RecipeSearchGateway` — interface for search backends.
+  - `EdamamRecipeSearchGateway` — Edamam API implementation.
+
+- **UI**
+  - Swing views: `ExplorePageView`, `SavedRecipesView`, `MealPlannerView`, `SingleRecipeView`, `HomePageView`.
+  - `ViewManager` — controls navigation and state persistence.
+
+---
+
+### Data Flow
+1. UI gathers filters → passes to `SearchRecipesUseCase`.
+2. Use case calls `EdamamRecipeSearchGateway`.
+3. API JSON is parsed by `RecipeBuilder`.
+4. Recipes are returned to the view for display.
+
+---
+
+## License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Feedback
+
+We welcome suggestions and bug reports!
+
+- Open an [issue on GitHub](https://github.com/yourusername/recipe-manager/issues)
+- Or email: `rocky.tu@mail.utoronto.ca`
+
+Please include:
+- Steps to reproduce (if it’s a bug)
+- Screenshot or console output
+- Expected vs actual behavior
+
+---
+
+## Contributing
+
+We’re happy to review pull requests.
+
+1. **Fork** the repository
+2. Create a **feature branch**:
+```bash
+git checkout -b feature/my-feature
+
+
+   
+
