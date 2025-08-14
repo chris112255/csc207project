@@ -1,4 +1,4 @@
-package test;
+package test.interactor;
 
 import entity.Recipe;
 import entity.Nutrients;
