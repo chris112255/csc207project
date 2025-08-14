@@ -5,7 +5,6 @@ import usecase.MealPlannerUsecase;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class MealPlannerView extends JPanel {
     private final String title = "Meal Planner";

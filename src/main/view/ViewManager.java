@@ -1,6 +1,8 @@
 package main.view;
 
 import usecase.MealPlannerUsecase;
+import interface_adapter.favourites.FavouritesController;
+import interface_adapter.favourites.FavouritesViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +20,7 @@ public class ViewManager {
     private final CardLayout cl;
 
     // Persisted use case for the whole session
-    private final MealPlannerUsecase plannerUsecase = new MealPlannerUsecase();
+    private final MealPlannerUsecase plannerUsecase;
 
     // Panels created once so state persists
     private final HomePageView homePanel;
@@ -26,7 +28,8 @@ public class ViewManager {
     private final SavedRecipesView savedPanel;
     private final MealPlannerView plannerPanel;
 
-    public ViewManager() {
+    public ViewManager(MealPlannerUsecase plannerUsecase) {
+        this.plannerUsecase = plannerUsecase;
         // ----- Window -----
         frame = new JFrame("Recipe Manager");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -56,7 +59,10 @@ public class ViewManager {
 
         homePanel = new HomePageView(
                 () -> cl.show(cards, CARD_EXPLORE),
-                () -> cl.show(cards, CARD_SAVED),
+                () -> {
+                    savedPanel.loadFavorites();
+                    cl.show(cards, CARD_SAVED);
+                },
                 () -> { plannerPanel.refreshMeals(); cl.show(cards, CARD_PLANNER); }
         );
 
@@ -82,8 +88,26 @@ public class ViewManager {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
+    public void setFavouritesController(FavouritesController controller) {
+        savedPanel.setFavouritesController(controller);
+        explorePanel.setFavouritesController(controller);
+    }
+
+    public void setFavouritesViewModel(FavouritesViewModel viewModel) {
+        savedPanel.setFavouritesViewModel(viewModel);
+    }
+
+    public JFrame getFrame() {
+        return frame;
+    }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(ViewManager::new);
+        SwingUtilities.invokeLater(() -> {
+            app.AppBuilder appBuilder = new app.AppBuilder();
+            JFrame application = appBuilder
+                    .addViewManager()
+                    .addFavouritesUseCase()
+                    .build();
+        });
     }
 }

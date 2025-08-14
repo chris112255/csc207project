@@ -4,7 +4,7 @@ import entity.Recipe;
 import entity.Nutrients;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import usecase.FavouritesUsecase;
+import usecase.favourites.FavouritesUsecase;
 import usecase.sort.RecipeSorterUseCase;
 
 import java.util.ArrayList;

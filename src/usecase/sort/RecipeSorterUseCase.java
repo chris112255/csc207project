@@ -1,6 +1,7 @@
 package usecase.sort;
 
 import entity.Recipe;
+import usecase.favourites.FavouritesUsecase;
 
 import java.util.*;
 

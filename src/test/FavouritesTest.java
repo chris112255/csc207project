@@ -3,7 +3,7 @@ package test;
 import entity.Recipe;
 import entity.Nutrients;
 import org.junit.jupiter.api.*;
-import usecase.FavouritesUsecase;
+import usecase.favourites.FavouritesUsecase;
 
 import java.io.*;
 import java.util.Arrays;
