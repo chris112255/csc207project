@@ -4,7 +4,7 @@ import entity.Recipe;
 import entity.Nutrients;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import use_case.MealPlannerUsecase;
+import usecase.MealPlannerUsecase;
 
 import java.util.Arrays;
 

@@ -1,8 +1,8 @@
 package main.view;
 
 import entity.Recipe;
-import use_case.MealPlannerUsecase;
-import use_case.sort.RecipeSorterUseCase;
+import usecase.MealPlannerUsecase;
+import usecase.sort.RecipeSorterUseCase;
 
 import interface_adapter.favourites.FavouritesController;
 import interface_adapter.favourites.FavouritesState;

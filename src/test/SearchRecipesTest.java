@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import use_case.search.RecipeSearchGateway;
-import use_case.search.SearchRecipesUseCase;
+import usecase.search.RecipeSearchGateway;
+import usecase.search.SearchRecipesUseCase;
 
 import java.util.*;
 

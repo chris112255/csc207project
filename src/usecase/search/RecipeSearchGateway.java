@@ -1,5 +1,5 @@
 // usecase/search/RecipeSearchGateway.java
-package use_case.search;
+package usecase.search;
 
 import entity.Recipe;
 import java.util.List;

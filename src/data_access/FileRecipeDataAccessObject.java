@@ -11,7 +11,7 @@ import java.util.List;
 
 import api.EdamamRecipeSearchGateway;
 import entity.Recipe;
-import use_case.favourites.FavouritesUserDataAccessInterface;
+import usecase.favourites.FavouritesUserDataAccessInterface;
 
 /**
  * DAO for recipe data implemented using a File to persist the data.

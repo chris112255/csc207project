@@ -1,4 +1,4 @@
-package use_case.favourites;
+package usecase.favourites;
 
 /**
  * The output boundary for the Favourites Use Case.

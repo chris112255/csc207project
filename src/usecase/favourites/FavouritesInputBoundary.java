@@ -1,4 +1,4 @@
-package use_case.favourites;
+package usecase.favourites;
 
 /**
  * Input Boundary for actions which are related to favourites.

@@ -1,4 +1,4 @@
-package use_case.sort;
+package usecase.sort;
 
 import entity.Recipe;
 import java.util.List;

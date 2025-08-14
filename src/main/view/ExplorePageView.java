@@ -3,9 +3,9 @@ package main.view;
 import api.EdamamRecipeSearchGateway;
 import entity.Recipe;
 import interface_adapter.favourites.FavouritesController;
-import use_case.MealPlannerUsecase;
-import use_case.search.SearchRecipesUseCase;
-import use_case.sort.RecipeSorterUseCase;
+import usecase.MealPlannerUsecase;
+import usecase.search.SearchRecipesUseCase;
+import usecase.sort.RecipeSorterUseCase;
 import data_access.FileRecipeDataAccessObject;
 
 import javax.imageio.ImageIO;

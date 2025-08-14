@@ -1,7 +1,7 @@
 package main.view;
 
 import entity.Recipe;
-import use_case.MealPlannerUsecase;
+import usecase.MealPlannerUsecase;
 
 import javax.swing.*;
 import java.awt.*;

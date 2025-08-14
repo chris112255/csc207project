@@ -1,4 +1,4 @@
-package use_case.favourites;
+package usecase.favourites;
 
 /**
  * Output Data for the Favourites Use Case.

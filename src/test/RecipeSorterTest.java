@@ -4,8 +4,8 @@ import entity.Recipe;
 import entity.Nutrients;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import use_case.favourites.FavouritesUsecase;
-import use_case.sort.RecipeSorterUseCase;
+import usecase.favourites.FavouritesUsecase;
+import usecase.sort.RecipeSorterUseCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;

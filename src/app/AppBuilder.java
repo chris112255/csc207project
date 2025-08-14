@@ -6,11 +6,11 @@ import data_access.FileRecipeDataAccessObject;
 import interface_adapter.favourites.FavouritesController;
 import interface_adapter.favourites.FavouritesPresenter;
 import interface_adapter.favourites.FavouritesViewModel;
-import use_case.favourites.FavouritesInputBoundary;
-import use_case.favourites.FavouritesInteractor;
-import use_case.favourites.FavouritesOutputBoundary;
+import usecase.favourites.FavouritesInputBoundary;
+import usecase.favourites.FavouritesInteractor;
+import usecase.favourites.FavouritesOutputBoundary;
 import main.view.ViewManager;
-import use_case.MealPlannerUsecase;
+import usecase.MealPlannerUsecase;
 
 /**
  * The AppBuilder class is responsible for putting together the pieces of
