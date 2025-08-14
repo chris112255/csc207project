@@ -1,7 +1,7 @@
-package usecase.sort;
+package use_case.sort;
 
 import entity.Recipe;
-import usecase.FavouritesUsecase;
+import use_case.favourites.FavouritesUsecase;
 
 import java.util.*;
 import java.util.Map.Entry;
